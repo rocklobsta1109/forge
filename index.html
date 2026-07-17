@@ -235,6 +235,11 @@
   .search{width:100%;padding:12px 14px;border:1px solid var(--border);background:var(--surface-2);
     color:var(--text);border-radius:12px;font-size:15px;margin-bottom:10px;}
   .search:focus{outline:none;border-color:var(--accent);}
+  .eqchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .eqchip{border:none;padding:7px 12px;border-radius:99px;background:var(--surface-2);color:var(--muted);
+    font-size:12px;font-weight:700;cursor:pointer;transition:.12s;}
+  .eqchip.on{background:var(--accent);color:#1a0e08;}
+  .eqchip:active{transform:scale(.94);}
   .pick-row{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--border);cursor:pointer;}
   .pick-row:active{background:var(--surface-2);}
   .pick-row .mg{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.4px;}
@@ -391,40 +396,128 @@ function buildPresets(){
    Everything is doable with adjustable dumbbells + a flat/incline bench (or bodyweight). */
 const MOVEMENT_POOLS = {
   squat:        {label:"Squat (knee-dominant)", muscle:"Legs",
-                 list:["DB Goblet Squat","DB Front Squat","DB Sumo Squat","Heels-Elevated Goblet Squat","DB Box Squat","Bodyweight Squat","Tempo Goblet Squat"]},
+                 list:["DB Goblet Squat","DB Front Squat","DB Sumo Squat","Heels-Elevated Goblet Squat","DB Box Squat","Bodyweight Squat","Tempo Goblet Squat","Back Squat","Front Squat"]},
   lunge:        {label:"Lunge / split squat (single-leg)", muscle:"Legs",
-                 list:["Bulgarian Split Squat","DB Reverse Lunge","DB Forward Lunge","Walking Lunge","DB Step-Up","DB Split Squat","Curtsy Lunge","Reverse Lunge"]},
+                 list:["Bulgarian Split Squat","DB Reverse Lunge","DB Forward Lunge","Walking Lunge","DB Step-Up","DB Split Squat","Curtsy Lunge","Reverse Lunge","Barbell Reverse Lunge"]},
   hinge:        {label:"Hip hinge (posterior chain)", muscle:"Legs",
-                 list:["DB Romanian Deadlift","DB Stiff-Leg Deadlift","Single-Leg DB RDL","DB Good Morning","DB Sumo Deadlift","Bodyweight Hip Hinge"]},
+                 list:["DB Romanian Deadlift","DB Stiff-Leg Deadlift","Single-Leg DB RDL","DB Good Morning","DB Sumo Deadlift","Bodyweight Hip Hinge","Romanian Deadlift","Deadlift","Rack Pull","Barbell Good Morning"]},
   bridge:       {label:"Glute bridge / hip thrust", muscle:"Legs",
-                 list:["Weighted Glute Bridge","DB Hip Thrust","Single-Leg Glute Bridge","Frog Pump","B-Stance Hip Thrust"]},
+                 list:["Weighted Glute Bridge","DB Hip Thrust","Single-Leg Glute Bridge","Frog Pump","B-Stance Hip Thrust","Barbell Hip Thrust"]},
   press_flat:   {label:"Horizontal press (flat)", muscle:"Chest",
-                 list:["Flat DB Bench Press","Push-Up","DB Floor Press","Weighted Push-Up","Close-Grip DB Press","Wide-Grip Push-Up"]},
+                 list:["Flat DB Bench Press","Push-Up","DB Floor Press","Weighted Push-Up","Close-Grip DB Press","Wide-Grip Push-Up","Barbell Bench Press","Close-Grip Bench Press"]},
   press_incline:{label:"Incline press (upper chest)", muscle:"Chest",
-                 list:["Incline DB Press","Low-Incline DB Press","Incline DB Squeeze Press","Feet-Elevated Push-Up","Incline Hex Press"]},
+                 list:["Incline DB Press","Low-Incline DB Press","Incline DB Squeeze Press","Feet-Elevated Push-Up","Incline Hex Press","Barbell Incline Press"]},
   fly:          {label:"Chest fly (adduction)", muscle:"Chest",
                  list:["DB Bench Fly","Incline DB Fly","Floor DB Fly","Plate Svend Press"]},
   row:          {label:"Horizontal pull / row", muscle:"Back",
-                 list:["One-Arm DB Row","Chest Supported Row","DB Renegade Row","DB Bent-Over Row","Inverted Row","Seal Row","Gorilla Row"]},
+                 list:["One-Arm DB Row","Chest Supported Row","DB Renegade Row","DB Bent-Over Row","Inverted Row","Seal Row","Gorilla Row","Barbell Row","Pendlay Row"]},
+  pull_vert:    {label:"Vertical pull (lats)", muscle:"Back",
+                 list:["Pull-Up","Chin-Up","Lat Pulldown"]},
   press_oh:     {label:"Overhead press (vertical)", muscle:"Shoulders",
-                 list:["DB Overhead Press","Seated DB Shoulder Press","DB Push Press","Arnold Press","Single-Arm DB Press","Pike Push-Up"]},
+                 list:["DB Overhead Press","Seated DB Shoulder Press","DB Push Press","Arnold Press","Single-Arm DB Press","Pike Push-Up","Overhead Press","Barbell Push Press"]},
   lateral:      {label:"Lateral / delt raise", muscle:"Shoulders",
                  list:["DB Lateral Raise","DB Front Raise","Leaning Lateral Raise","Rear Delt Fly","Seated Lateral Raise","6-Way Shoulder Raise"]},
   shrug:        {label:"Shrug / traps", muscle:"Back",
-                 list:["DB Shrug","Incline DB Shrug","DB Upright Row","DB High Pull","Farmer-Hold Shrug"]},
+                 list:["DB Shrug","Incline DB Shrug","DB Upright Row","DB High Pull","Farmer-Hold Shrug","Barbell Shrug"]},
   curl:         {label:"Biceps curl", muscle:"Arms",
-                 list:["DB Bicep Curl","Hammer Curl","Incline DB Curl","Concentration Curl","Cross-Body Hammer Curl","Zottman Curl","Spider Curl"]},
+                 list:["DB Bicep Curl","Hammer Curl","Incline DB Curl","Concentration Curl","Cross-Body Hammer Curl","Zottman Curl","Spider Curl","Barbell Curl"]},
   triceps:      {label:"Triceps extension", muscle:"Arms",
-                 list:["Overhead DB Tricep Extension","DB Skullcrusher","DB Kickback","Close-Grip Push-Up","Bench Dip","DB Tate Press"]},
+                 list:["Overhead DB Tricep Extension","DB Skullcrusher","DB Kickback","Close-Grip Push-Up","Bench Dip","DB Tate Press","Skullcrusher"]},
   core_rot:     {label:"Core — rotation / anti-rotation", muscle:"Core",
                  list:["DB Anchored Russian Twist","DB Plank Pull-Through","DB Wood Chop","Side Plank Reach-Through","Bicycle Crunch","DB Standing Twist"]},
   core_stab:    {label:"Core — anti-extension / lower abs", muscle:"Core",
-                 list:["DB 90-Degree Heel Tap","Dead Bug","Hollow Body Hold","Reverse Crunch","Lying Leg Raise","Plank","Mountain Climbers"]},
+                 list:["DB 90-Degree Heel Tap","Dead Bug","Hollow Body Hold","Reverse Crunch","Lying Leg Raise","Plank","Mountain Climbers","Barbell Rollout"]},
 };
 function exPattern(name){ const e=state.exercises.find(x=>x.name===name); return e&&e.pattern; }
 function patternLabel(name){ const p=exPattern(name); return p&&MOVEMENT_POOLS[p]?MOVEMENT_POOLS[p].label:""; }
 function altsFor(name){ const p=exPattern(name); if(!p) return [];
   return state.exercises.filter(e=>e.pattern===p && e.name!==name); }
+
+/* ---------- Equipment tagging ---------- */
+const EQUIP_LABELS={barbell:"Barbell",dumbbell:"Dumbbells",bodyweight:"Bodyweight",pullup:"Pull-up bar",gym:"Gym"};
+const EQUIP_SHORT ={barbell:"BB",dumbbell:"DB",bodyweight:"BW",pullup:"Bar",gym:"Gym"};
+const EQUIP_EXPLICIT={
+  // barbell (names without a "Barbell" prefix)
+  "Back Squat":"barbell","Front Squat":"barbell","Deadlift":"barbell","Romanian Deadlift":"barbell",
+  "Overhead Press":"barbell","Close-Grip Bench Press":"barbell","Skullcrusher":"barbell",
+  "Rack Pull":"barbell","Pendlay Row":"barbell",
+  // pull-up bar
+  "Pull-Up":"pullup","Chin-Up":"pullup","Hanging Leg Raise":"pullup","Inverted Row":"pullup",
+  // dumbbell (names the prefix rules miss)
+  "Hammer Curl":"dumbbell","Lateral Raise":"dumbbell","Rear Delt Fly":"dumbbell","Chest Supported Row":"dumbbell",
+  "Weighted Glute Bridge":"dumbbell","Bulgarian Split Squat":"dumbbell","Walking Lunge":"dumbbell","Curtsy Lunge":"dumbbell",
+  "Arnold Press":"dumbbell","Leaning Lateral Raise":"dumbbell","Seated Lateral Raise":"dumbbell","6-Way Shoulder Raise":"dumbbell",
+  "Farmer-Hold Shrug":"dumbbell","Incline Hex Press":"dumbbell","Plate Svend Press":"dumbbell","Concentration Curl":"dumbbell",
+  "Spider Curl":"dumbbell","Zottman Curl":"dumbbell","Cross-Body Hammer Curl":"dumbbell","Gorilla Row":"dumbbell",
+  "Seal Row":"dumbbell","Calf Raise":"dumbbell",
+  // bodyweight
+  "Push-Up":"bodyweight","Wide-Grip Push-Up":"bodyweight","Close-Grip Push-Up":"bodyweight","Feet-Elevated Push-Up":"bodyweight",
+  "Weighted Push-Up":"bodyweight","Pike Push-Up":"bodyweight","Bodyweight Squat":"bodyweight","Reverse Lunge":"bodyweight",
+  "Bodyweight Hip Hinge":"bodyweight","Single-Leg Glute Bridge":"bodyweight","Frog Pump":"bodyweight","B-Stance Hip Thrust":"bodyweight",
+  "Superman":"bodyweight","Plank":"bodyweight","Mountain Climbers":"bodyweight","Dead Bug":"bodyweight","Hollow Body Hold":"bodyweight",
+  "Reverse Crunch":"bodyweight","Lying Leg Raise":"bodyweight","Bicycle Crunch":"bodyweight","Side Plank Reach-Through":"bodyweight",
+  "Russian Twist":"bodyweight","Bench Dip":"bodyweight","90/90 Hip Stretch":"bodyweight",
+  // gym machines / cables / cardio
+  "Cable Fly":"gym","Dip":"gym","Leg Press":"gym","Leg Extension":"gym","Leg Curl":"gym","Lat Pulldown":"gym",
+  "Seated Cable Row":"gym","Face Pull":"gym","Tricep Pushdown":"gym","Cable Crunch":"gym",
+  "Treadmill Run":"gym","Rowing Machine":"gym","Cycling":"gym",
+};
+function equipFor(name){
+  if(EQUIP_EXPLICIT[name]) return EQUIP_EXPLICIT[name];
+  if(/^Barbell/.test(name)) return "barbell";
+  if(/(^|\s)DB\s|Dumbbell|Goblet/.test(name)) return "dumbbell";
+  return null;   // custom / unknown → shows under "All" only
+}
+
+/* ---------- Equipment mode (Dumbbell / Combo / Barbell) ----------
+   One authored routine, three implements: at start time each exercise resolves
+   through its movement pool to the anchor for the chosen mode.
+   big:true pools are the ones Combo upgrades to the bar. */
+const POOL_ANCHORS={
+  squat:        {db:"DB Goblet Squat",        bb:"Back Squat",           big:true},
+  lunge:        {db:"DB Reverse Lunge",       bb:"Barbell Reverse Lunge",big:false},
+  hinge:        {db:"DB Romanian Deadlift",   bb:"Romanian Deadlift",    big:true},
+  bridge:       {db:"DB Hip Thrust",          bb:"Barbell Hip Thrust",   big:true},
+  press_flat:   {db:"Flat DB Bench Press",    bb:"Barbell Bench Press",  big:true},
+  press_incline:{db:"Incline DB Press",       bb:"Barbell Incline Press",big:false},
+  row:          {db:"One-Arm DB Row",         bb:"Barbell Row",          big:true},
+  press_oh:     {db:"DB Overhead Press",      bb:"Overhead Press",       big:true},
+  shrug:        {db:"DB Shrug",               bb:"Barbell Shrug",        big:false},
+  curl:         {db:"DB Bicep Curl",          bb:"Barbell Curl",         big:false},
+  triceps:      {db:"Overhead DB Tricep Extension", bb:"Skullcrusher",   big:false},
+};
+/* name-level refinements; null = never map this movement (keeps its intent) */
+const BB_OVERRIDES={
+  "DB Front Squat":"Front Squat","DB Sumo Deadlift":"Deadlift","DB Good Morning":"Barbell Good Morning",
+  "DB Push Press":"Barbell Push Press","Gorilla Row":"Pendlay Row",
+  "Single-Leg DB RDL":null,"DB Step-Up":null,"DB Renegade Row":null,"DB Upright Row":null,"DB High Pull":null,
+};
+const DB_OVERRIDES={
+  "Front Squat":"DB Front Squat","Pendlay Row":"Gorilla Row","Barbell Push Press":"DB Push Press",
+  "Barbell Good Morning":"DB Good Morning","Barbell Incline Press":"Incline DB Press","Skullcrusher":"DB Skullcrusher",
+  "Barbell Reverse Lunge":"DB Reverse Lunge","Close-Grip Bench Press":"Close-Grip DB Press",
+  "Rack Pull":"DB Romanian Deadlift","Barbell Rollout":null,
+};
+function mapExerciseForMode(name, mode){
+  const e=state.exercises.find(x=>x.name===name);
+  if(!e) return name;
+  if(!mode||mode==="db"){          // dumbbell mode: bring barbell movements down to DB equivalents
+    if(e.equipment!=="barbell") return name;
+    if(DB_OVERRIDES[name]!==undefined) return DB_OVERRIDES[name]||name;
+    const a=e.pattern&&POOL_ANCHORS[e.pattern];
+    return (a&&a.db)||name;
+  }
+  // combo / bb: upgrade dumbbell movements to the bar (bodyweight & pull-up work stays deliberate)
+  if(e.equipment!=="dumbbell") return name;
+  const a=e.pattern&&POOL_ANCHORS[e.pattern];
+  if(BB_OVERRIDES[name]!==undefined){
+    const o=BB_OVERRIDES[name]; if(!o) return name;
+    return (mode==="bb"||(a&&a.big))?o:name;
+  }
+  if(!a||!a.bb) return name;
+  return (mode==="bb"||a.big)?a.bb:name;
+}
+function equipMode(){ return state.settings.equipMode||"db"; }
 
 /* ---------- Bodyweight "away day" program (no equipment) ---------- */
 const BW_PROGRAM = { ex:[
@@ -450,6 +543,43 @@ function buildBodyweightPresets(){
   }));
 }
 
+/* ---------- Barbell strength days (standalone — start from Routines) ---------- */
+const BARBELL_PROGRAM=[
+  { key:"BB-L", title:"Barbell Lower",
+    warmup:"Warm-up: 1–2 empty-bar sets of squats before loading.", ex:[
+    {name:"Back Squat",muscle:"Legs",his:[4,"6"],hers:[3,"8-10"],note:"Bar on the upper traps; set the safeties just below your bottom position."},
+    {name:"Romanian Deadlift",muscle:"Legs",his:[3,"8"],hers:[3,"10"],note:"Bar slides down the thighs; flat back, deep hamstring stretch."},
+    {name:"Barbell Hip Thrust",muscle:"Legs",his:[3,"8-10"],hers:[4,"10-12"],note:"Upper back on the bench, bar padded across the hips; full lockout + squeeze."},
+    {name:"Barbell Reverse Lunge",muscle:"Legs",his:[3,"8 / leg"],hers:[3,"10 / leg"],note:"Bar on the back; step back under control, drive through the front heel."},
+    {name:"Barbell Rollout",muscle:"Core",his:[3,"8"],hers:[3,"6"],note:"Kneeling; roll out only as far as your flat back allows."},
+  ]},
+  { key:"BB-U", title:"Barbell Upper",
+    warmup:"Warm-up: empty-bar bench + a few easy pulls before working weight.", ex:[
+    {name:"Barbell Bench Press",muscle:"Chest",his:[4,"6"],hers:[3,"8-10"],note:"Safeties just below chest height; feet planted, blades pinched."},
+    {name:"Barbell Row",muscle:"Back",his:[4,"6-8"],hers:[3,"10"],note:"Hinge to 45°; pull to the lower ribs, no heaving."},
+    {name:"Overhead Press",muscle:"Shoulders",his:[3,"6-8"],hers:[3,"8-10"],note:"Bar is 44 lb empty — swap to DB press if that's too heavy today."},
+    {name:"Pull-Up",muscle:"Back",his:[3,"6-10"],hers:[3,"3-6"],note:"Chin over the bar; scale with a band or slow 5s negatives."},
+    {name:"DB Skullcrusher",muscle:"Arms",his:[3,"10"],hers:[3,"12"],note:"Only the forearms move; DBs lower beside the forehead."},
+    {name:"Hanging Leg Raise",muscle:"Core",his:[3,"10"],hers:[3,"8"],note:"From the pull-up bar; curl the pelvis up, no swinging."},
+  ]},
+];
+function buildBarbellPresets(){
+  const variants=[
+    ["his","His · Mass","🏋️ Strength focus — rest 2–3 min on the big lifts."],
+    ["hers","Hers · Tone","🏋️ Strength focus — rest 60–90s, leave 1–2 reps in the tank."],
+  ];
+  const out=[];
+  BARBELL_PROGRAM.forEach(day=>variants.forEach(([k,label,tip])=>{
+    out.push({
+      id:"preset-"+day.key+"-"+k, preset:true, barbell:true,
+      name:`${day.title} (${label})`,
+      note:(day.warmup?day.warmup+"  ":"")+tip,
+      exercises: day.ex.map(e=>({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note})),
+    });
+  }));
+  return out;
+}
+
 function seedData(){
   // make sure every program exercise exists in the library (match by name)
   let changed=false;
@@ -462,6 +592,8 @@ function seedData(){
       if(ex.pattern!==pat){ ex.pattern=pat; changed=true; }
     });
   });
+  // tag every known exercise with its equipment (idempotent; customs stay untagged)
+  state.exercises.forEach(ex=>{ const q=equipFor(ex.name); if(q&&ex.equipment!==q){ ex.equipment=q; changed=true; } });
   if(changed) save("exercises");
   // seed the preset routines exactly once (user can edit/delete afterward)
   if(!DB.get("seed_v1", false)){
@@ -480,6 +612,12 @@ function seedData(){
     const ids=new Set(state.routines.map(r=>r.id));
     buildPresets().forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); });
     save("routines"); DB.set("seed_v2", true);
+  }
+  // seed the standalone barbell strength routines once
+  if(!DB.get("seed_v3", false)){
+    const ids=new Set(state.routines.map(r=>r.id));
+    buildBarbellPresets().forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); });
+    save("routines"); DB.set("seed_v3", true);
   }
   // anchor the 2-week rotation so the week this feature arrived stays A/B/C
   if(!state.plan.cycleAnchor){
@@ -508,7 +646,7 @@ function nextPlanDay(fromTs){
   return null;
 }
 function restorePresets(){ const ids=new Set(state.routines.map(r=>r.id));
-  buildPresets().concat(buildBodyweightPresets()).forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); }); save("routines"); }
+  buildPresets().concat(buildBodyweightPresets(), buildBarbellPresets()).forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); }); save("routines"); }
 function startBodyweight(){
   const variant=state.settings.planVariant||"his";
   let r=state.routines.find(x=>x.id==="preset-BW-"+variant);
@@ -705,9 +843,11 @@ function parseRepRange(target){
   if(!m) return null;
   return {lo:+m[1], hi:+(m[2]||m[1]), time:false};
 }
-/* smaller jumps for isolation-dominant muscle groups */
-function progressIncrement(muscle){
-  const small=["Arms","Shoulders","Core"].includes(muscle);
+/* smaller jumps for isolation work; the barbell floors at 5 lb (2.5s load in pairs) */
+function progressIncrement(ex){
+  const lib=state.exercises.find(x=>x.name===ex.name);
+  if(lib&&lib.equipment==="barbell") return U()==="kg" ? 2.5 : 5;
+  const small=["Arms","Shoulders","Core"].includes(ex.muscle);
   return U()==="kg" ? (small?1.25:2.5) : (small?2.5:5);
 }
 /* Suggest the next step based on last performance vs the target rep range:
@@ -726,7 +866,7 @@ function suggestNext(ex, prevSets){
   }
   if(allTop){
     if(topW>0){
-      const w=topW+progressIncrement(ex.muscle);
+      const w=topW+progressIncrement(ex);
       return {type:"weight", weight:w, reps:range.lo,
         text:`Try ${fmtNum(w)} ${U()} × ${range.lo} — you hit the top of the rep range last time`};
     }
@@ -854,6 +994,17 @@ function computeStreak(){
   return streak;
 }
 
+/* Dumbbell / Combo / Barbell segmented toggle (device-level, like His/Hers) */
+function equipModeSeg(){
+  const seg=el(`<div class="btn-row" style="margin:0 0 10px"></div>`);
+  [["db","Dumbbell"],["combo","Combo"],["bb","Barbell"]].forEach(([val,label])=>{
+    const b=el(`<button class="btn ${equipMode()===val?"primary":"ghost"} sm" style="flex:1">${label}</button>`);
+    b.onclick=()=>{ state.settings.equipMode=val; save("settings"); render(); };
+    seg.appendChild(b);
+  });
+  return seg;
+}
+
 function planCard(){
   const {dow, today, p, due} = planState();
   const variant = state.settings.planVariant || "his";
@@ -889,13 +1040,15 @@ function planCard(){
     card.appendChild(titleRow);
 
     // His / Hers toggle
-    const seg = el(`<div class="btn-row" style="margin:12px 0 10px"></div>`);
+    const seg = el(`<div class="btn-row" style="margin:12px 0 8px"></div>`);
     [["his","His · Mass"],["hers","Hers · Tone"]].forEach(([val,label])=>{
       const b = el(`<button class="btn ${variant===val?"primary":"ghost"} sm" style="flex:1">${label}</button>`);
       b.onclick=()=>{ state.settings.planVariant=val; save("settings"); render(); };
       seg.appendChild(b);
     });
     card.appendChild(seg);
+    // Dumbbell / Combo / Barbell equipment toggle
+    card.appendChild(equipModeSeg());
 
     const r = planRoutine(due.key, variant);
     if(r){
@@ -966,9 +1119,16 @@ function startEmpty(){
 function startFromRoutine(rid, planKey){
   const r = state.routines.find(x=>x.id===rid); if(!r) return;
   if(state.active && !confirmAct("Discard the workout in progress and start this routine?")) return;
+  const mode = r.bodyweight ? "db" : equipMode();   // away-day routine stays as authored
   state.active = {id:uid(), name:r.name, start:Date.now(), date:todayISO(), note:r.note||"", planKey:planKey||null,
-    exercises: r.exercises.map(re=>({ id:uid(), name:re.name, muscle:re.muscle, note:re.note||"", target:re.reps||"",
-      sets: Array.from({length:re.sets||1}, ()=>({weight:"",reps:"",done:false})) }))
+    exercises: r.exercises.map(re=>{
+      const mapped = mapExerciseForMode(re.name, mode);
+      const lib = mapped!==re.name && state.exercises.find(x=>x.name===mapped);
+      return { id:uid(), name:mapped, muscle:(lib&&lib.muscle)||re.muscle,
+        note: mapped===re.name ? (re.note||"") : "",   // old form cue doesn't apply; ⓘ has the how-to
+        target:re.reps||"",
+        sets: Array.from({length:re.sets||1}, ()=>({weight:"",reps:"",done:false})) };
+    })
   };
   save("active"); setTab("home"); go("workout");
 }
@@ -1139,15 +1299,25 @@ function shuffleAllExercises(){
 /* pick a specific alternate from the same movement pattern */
 function openSwap(ei){
   const w=state.active; const ex=w.exercises[ei]; const alts=altsFor(ex.name); const lbl=patternLabel(ex.name);
+  let eqFilter="all";
   openSheet("Swap movement", body=>{
     if(lbl) body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px;font-size:13px">Same target & motion · <b style="color:var(--accent-2)">${esc(lbl)}</b></div>`));
+    body.appendChild(equipChipRow(eqFilter, v=>{ eqFilter=v; drawAlts(); }));
+    const listWrap=el(`<div></div>`); body.appendChild(listWrap);
+    const cur=state.exercises.find(x=>x.name===ex.name);
     const mk=(o,current)=>{
-      const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(o.name)}</div><div class="mg">${esc(o.muscle||"")}</div></div>${current?'<span class="cat-tag">current</span>':'<span style="font-size:20px;color:var(--faint)">›</span>'}</div>`);
+      const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(o.name)}</div><div class="mg">${esc(o.muscle||"")}</div></div>${equipTagHTML(o)}${current?'<span class="cat-tag">current</span>':'<span style="font-size:20px;color:var(--faint)">›</span>'}</div>`);
       if(!current) row.onclick=()=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; save("active"); closeSheet(); render(); toast("Swapped → "+o.name); };
       return row;
     };
-    body.appendChild(mk(ex,true));
-    alts.forEach(a=>body.appendChild(mk(a,false)));
+    function drawAlts(){
+      listWrap.innerHTML="";
+      listWrap.appendChild(mk(cur||ex,true));
+      const shown=alts.filter(a=>eqFilter==="all"||a.equipment===eqFilter);
+      shown.forEach(a=>listWrap.appendChild(mk(a,false)));
+      if(!shown.length) listWrap.appendChild(el(`<div class="muted" style="padding:14px 4px">No alternates with that equipment.</div>`));
+    }
+    drawAlts();
   });
 }
 
@@ -1452,6 +1622,8 @@ function renderRoutines(app){
   add.onclick=()=>go("routine-edit",{id:null});
   app.appendChild(header("Routines",{back:false,right:add}));
   const s=el(`<div class="screen"></div>`);
+  s.appendChild(el(`<div class="section-label" style="margin-top:4px">Equipment mode · applies when you start</div>`));
+  s.appendChild(equipModeSeg());
   if(!state.routines.length){
     s.appendChild(el(`<div class="empty"><span class="emo">📋</span><h3>No routines yet</h3><div>Build a reusable routine and start it with one tap.</div></div>`));
     const b=el(`<button class="btn primary">＋ Create Routine</button>`); b.onclick=()=>go("routine-edit",{id:null}); s.appendChild(b);
@@ -1462,9 +1634,14 @@ function renderRoutines(app){
     const top=el(`<div class="row" style="cursor:pointer"><div class="grow"><div class="title">${esc(r.name)}</div><div class="sub">${r.exercises.length} exercises · tap to view</div></div><span class="chev" style="font-size:13px;color:var(--faint);transition:.15s">▼</span></div>`);
     const details=el(`<div style="display:none;margin-top:8px"></div>`);
     r.exercises.forEach(re=>{
+      // show what this slot resolves to under the current equipment mode
+      const mapped = r.bodyweight ? re.name : mapExerciseForMode(re.name, equipMode());
+      const lib = state.exercises.find(x=>x.name===mapped);
+      const eq = lib&&lib.equipment ? `<span class="cat-tag" style="flex:0 0 auto">${EQUIP_SHORT[lib.equipment]||""}</span>` : "";
       const erow=el(`<div class="row" style="padding:8px 0;border-top:1px solid var(--border)"></div>`);
-      erow.appendChild(infoBtn(re.name));
-      erow.appendChild(el(`<div class="grow" style="font-weight:600;font-size:14px;min-width:0">${esc(re.name)}</div>`));
+      erow.appendChild(infoBtn(mapped));
+      erow.appendChild(el(`<div class="grow" style="font-weight:600;font-size:14px;min-width:0">${esc(mapped)}${mapped!==re.name?` <span class="pill" style="font-size:11px">↷</span>`:""}</div>`));
+      if(eq) erow.appendChild(el(eq));
       erow.appendChild(el(`<span class="pill" style="font-variant-numeric:tabular-nums;white-space:nowrap">${re.sets||1}×${esc(re.reps||"—")}</span>`));
       details.appendChild(erow);
     });
@@ -1565,6 +1742,7 @@ function openExerciseInfo(name){
   openSheet(name, body=>{
     const chips=el(`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>`);
     if(ex&&ex.muscle) chips.appendChild(el(`<span class="chip accent">${esc(ex.muscle)}</span>`));
+    if(ex&&ex.equipment) chips.appendChild(el(`<span class="chip">${esc(EQUIP_LABELS[ex.equipment]||ex.equipment)}</span>`));
     const pl=patternLabel(name); if(pl) chips.appendChild(el(`<span class="chip">${esc(pl)}</span>`));
     body.appendChild(chips);
     if(info){
@@ -1598,11 +1776,26 @@ function openExerciseInfo(name){
 /* ============================================================
    EXERCISE PICKER (sheet)
    ============================================================ */
+/* row of equipment filter chips; calls onPick(value) and manages its own highlight */
+function equipChipRow(initial, onPick){
+  const row=el(`<div class="eqchips"></div>`);
+  [["all","All"],["barbell","Barbell"],["dumbbell","Dumbbell"],["bodyweight","Bodyweight"],["pullup","Pull-up bar"],["gym","Gym"]]
+    .forEach(([v,l])=>{
+      const b=el(`<button class="eqchip ${initial===v?"on":""}">${l}</button>`);
+      b.onclick=()=>{ row.querySelectorAll(".eqchip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); onPick(v); };
+      row.appendChild(b);
+    });
+  return row;
+}
+function equipTagHTML(e){ return e&&e.equipment ? `<span class="cat-tag" style="flex:0 0 auto">${EQUIP_SHORT[e.equipment]}</span>` : ""; }
+
 function openPicker(onDone){
   const chosen=new Set();
+  let eqFilter="all";
   openSheet("Add Exercises", body=>{
     const search=el(`<input class="search" placeholder="Search exercises…" autocomplete="off"/>`);
     body.appendChild(search);
+    body.appendChild(equipChipRow(eqFilter, v=>{ eqFilter=v; draw(); }));
     const newBtn=el(`<button class="btn ghost sm" style="width:100%;margin-bottom:10px">＋ Create custom exercise</button>`);
     newBtn.onclick=()=>createCustomExercise(()=>draw());
     body.appendChild(newBtn);
@@ -1614,6 +1807,7 @@ function openPicker(onDone){
       const q=search.value.trim().toLowerCase();
       const groups={};
       state.exercises.filter(e=>!q||e.name.toLowerCase().includes(q)||e.muscle.toLowerCase().includes(q))
+        .filter(e=>eqFilter==="all"||e.equipment===eqFilter)
         .sort((a,b)=>a.name.localeCompare(b.name))
         .forEach(e=>{ (groups[e.muscle]=groups[e.muscle]||[]).push(e); });
       listWrap.innerHTML="";
@@ -1621,7 +1815,7 @@ function openPicker(onDone){
         listWrap.appendChild(el(`<div class="section-label" style="margin:10px 4px 2px">${esc(mg)}</div>`));
         groups[mg].forEach(e=>{
           const on=chosen.has(e.id);
-          const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(e.name)}</div></div>${e.custom?'<span class="cat-tag">custom</span>':''}<span class="checkbtn ${on?"on":""}" style="pointer-events:none">✓</span></div>`);
+          const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(e.name)}</div></div>${equipTagHTML(e)}${e.custom?'<span class="cat-tag">custom</span>':''}<span class="checkbtn ${on?"on":""}" style="pointer-events:none">✓</span></div>`);
           row.insertBefore(infoBtn(e.name), row.firstChild);
           row.onclick=()=>{ if(chosen.has(e.id))chosen.delete(e.id); else chosen.add(e.id);
             footer.textContent=`Add (${chosen.size})`; draw(); };
