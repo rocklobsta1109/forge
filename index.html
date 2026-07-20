@@ -117,6 +117,9 @@
   .penalty-banner{background:rgba(255,77,94,.1);border:1px solid rgba(255,77,94,.4);border-radius:12px;
     padding:11px 14px;margin-top:14px;font-size:13px;color:#ffa7af;line-height:1.4;}
   .penalty-banner b{color:var(--danger);}
+  .deload-banner{background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.38);border-radius:12px;
+    padding:11px 14px;margin:0 0 12px;font-size:13px;color:#9cecbc;line-height:1.4;}
+  .deload-banner b{color:var(--good);}
 
   /* ---------- Toggle switch ---------- */
   .switch{width:48px;height:28px;border-radius:99px;background:var(--surface-3);border:1px solid var(--border);
@@ -140,6 +143,8 @@
     padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--accent-2);line-height:1.4;}
   .cue{font-size:12.5px;color:var(--muted);margin:-2px 0 10px;line-height:1.4;}
   .suggest{font-size:12.5px;color:var(--accent-2);font-weight:600;margin:-2px 0 10px;line-height:1.4;}
+  .personal-cue{font-size:12.5px;color:#d8c6ff;background:rgba(154,116,255,.1);border:1px solid rgba(154,116,255,.28);
+    border-radius:10px;padding:8px 10px;margin:-2px 0 10px;line-height:1.4;}
   .exercise-tools{display:flex;gap:8px;margin:-2px 0 10px;}
   .exercise-tools .btn{flex:1;}
   .load-result{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:12px;}
@@ -252,6 +257,12 @@
   .pick-row:active{background:var(--surface-2);}
   .pick-row .mg{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.4px;}
   .cat-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--surface-3);color:var(--muted);}
+  .difficulty-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+  .difficulty-row .btn{padding:11px 8px;font-size:13px;}
+  .summary-muscle{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .summary-muscle:last-child{border-bottom:none;}
+  .record-row{padding:11px 0;border-bottom:1px solid var(--border);}
+  .record-row:last-child{border-bottom:none;}
 
   /* ---------- Charts ---------- */
   .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
@@ -756,6 +767,13 @@ function addDaysISO(iso,n){ const [y,m,d]=iso.split("-").map(Number); const dt=n
   return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"); }
 function dowOfISO(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d).getDay(); }
 function originDow(key){ const wp=planFor(Date.now()); for(let d=0;d<7;d++) if(wp[d]===key) return d; return null; }
+function weekISO(ts=Date.now()){ const d=new Date(weekStartTs(ts)); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function deloadActive(ts=Date.now()){ return !!(state.plan&&state.plan.deloadWeek===weekISO(ts)); }
+function deloadSetCount(n){ return Math.max(1,Math.ceil((Number(n)||1)*2/3)); }
+function toggleDeload(){
+  if(deloadActive()){ state.plan.deloadWeek=null; save("plan"); render(); toast("Deload week ended"); }
+  else { state.plan.deloadWeek=weekISO(); save("plan"); render(); toast("🌿 Deload active · working sets reduced"); }
+}
 
 /* what workout (if any) is due today, accounting for deferrals */
 function planState(){
@@ -829,7 +847,9 @@ function mergeSnapshots(a,b){
   out.deleted=Object.values(tm).filter(t=>t.ts>cutoff);
   const dead=new Set(out.deleted.map(t=>t.id));
   // workouts: union by id minus tombstones, newest first
-  const wm={}; [...(a.workouts||[]),...(b.workouts||[])].forEach(w=>{ if(w&&w.id&&!dead.has(w.id)) wm[w.id]=w; });
+  const wm={}; [...(a.workouts||[]),...(b.workouts||[])].forEach(w=>{ if(w&&w.id&&!dead.has(w.id)){
+    const prev=wm[w.id]; if(!prev||(w.editedAt||0)>=(prev.editedAt||0)) wm[w.id]=w;
+  } });
   out.workouts=Object.values(wm).sort((x,y)=>y.end-x.end);
   // bodyweights: union by date, newer snapshot wins a same-day conflict
   const bm={}; [...(a.bodyweights||[]),...(b.bodyweights||[])].forEach(x=>{ if(x&&x.dateISO) bm[x.dateISO]=x; });
@@ -924,6 +944,7 @@ function fmtDur(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600),m=M
   return (h?h+":":"")+String(m).padStart(h?2:1,"0")+":"+String(ss).padStart(2,"0"); }
 function relTime(ts){ const d=Math.floor((Date.now()-ts)/86400000); if(d<=0)return"Today"; if(d===1)return"Yesterday"; if(d<7)return d+" days ago"; return fmtDate(ts); }
 function exById(id){ return state.exercises.find(e=>e.id===id); }
+function personalCueFor(name){ const e=state.exercises.find(x=>x.name===name); return (e&&e.personalCue||"").trim(); }
 function toast(msg){ const t=el(`<div class="toast">${esc(msg)}</div>`); document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity="0";t.style.transition=".3s";},1500); setTimeout(()=>t.remove(),1850); }
 function confirmAct(msg){ return window.confirm(msg); }
@@ -1136,6 +1157,8 @@ function planCard(){
   });
   card.appendChild(strip);
 
+  if(deloadActive()) card.appendChild(el(`<div class="deload-banner">🌿 <b>Deload week active</b> · working sets are reduced by about one-third and weekly targets adjust with them.</div>`));
+
   if(due){
     // ---- a workout is due ----
     const dayLine = due.overdue ? `Overdue · ${DAY_NAME[dowOfISO(p.deferred.dueISO)]}` : `Today · ${DAY_NAME[dow]}`;
@@ -1192,15 +1215,18 @@ function planCard(){
     knock.onclick=knockPenalty; pen.appendChild(knock);
     card.appendChild(pen);
   }
+  const deloadB=el(`<button class="btn ${deloadActive()?"good":"ghost"} sm" style="width:100%;margin-top:12px">${deloadActive()?"✓ Deload active — tap to end":"🌿 Make this a deload week"}</button>`);
+  deloadB.onclick=toggleDeload; card.appendChild(deloadB);
   return card;
 }
 
 function workoutCard(w){
+  const exN=w.exercises.length,setN=workoutSets(w);
   const c = el(`<div class="card tappable">
     <div class="row">
       <div class="grow">
         <div class="title">${esc(w.name||"Workout")}</div>
-        <div class="sub">${relTime(w.end)} · ${w.exercises.length} exercises · ${workoutSets(w)} sets</div>
+        <div class="sub">${relTime(w.end)} · ${exN} exercise${exN!==1?"s":""} · ${setN} set${setN!==1?"s":""}${w.difficulty?" · "+difficultyText(w.difficulty):""}${w.deload?" · 🌿 Deload":""}</div>
       </div>
       <div style="text-align:right">
         <div style="font-weight:800;color:var(--accent)">${fmtNum(workoutVolume(w)).toLocaleString()}</div>
@@ -1225,14 +1251,15 @@ function startFromRoutine(rid, planKey){
   const r = state.routines.find(x=>x.id===rid); if(!r) return;
   if(state.active && !confirmAct("Discard the workout in progress and start this routine?")) return;
   const mode = r.bodyweight ? "db" : equipMode();   // away-day routine stays as authored
-  state.active = {id:uid(), name:r.name, start:Date.now(), date:todayISO(), note:r.note||"", planKey:planKey||null,
+  const isDeload=deloadActive();
+  state.active = {id:uid(), name:r.name, start:Date.now(), date:todayISO(), note:r.note||"", planKey:planKey||null, deload:isDeload,
     exercises: r.exercises.map(re=>{
       const mapped = mapExerciseForMode(re.name, mode);
       const lib = mapped!==re.name && state.exercises.find(x=>x.name===mapped);
       return { id:uid(), name:mapped, muscle:(lib&&lib.muscle)||re.muscle,
         note: mapped===re.name ? (re.note||"") : "",   // old form cue doesn't apply; ⓘ has the how-to
         target:targetForMappedExercise(re.reps||"",re.name,mapped),
-        sets: Array.from({length:re.sets||1}, ()=>({weight:"",reps:"",done:false})) };
+        sets: Array.from({length:isDeload?deloadSetCount(re.sets):re.sets||1}, ()=>({weight:"",reps:"",done:false})) };
     })
   };
   save("active"); setTab("home"); go("workout");
@@ -1261,6 +1288,7 @@ function renderWorkout(app){
 
   // routine note / warm-up banner
   if(w.note){ s.appendChild(el(`<div class="note-banner">${esc(w.note)}</div>`)); }
+  if(w.deload){ s.appendChild(el(`<div class="deload-banner">🌿 <b>Deload session</b> · working sets were reduced; keep every rep crisp and leave plenty in reserve.</div>`)); }
 
   if(!w.exercises.length){
     s.appendChild(el(`<div class="empty"><span class="emo">🏋️</span><h3>No exercises yet</h3><div>Add your first exercise to start logging sets.</div></div>`));
@@ -1316,6 +1344,7 @@ function exerciseBlock(ex,ei){
   head.appendChild(menu);
   blk.appendChild(head);
   if(ex.note) blk.appendChild(el(`<div class="cue">${esc(ex.note)}</div>`));
+  const myCue=personalCueFor(ex.name); if(myCue) blk.appendChild(el(`<div class="personal-cue">📌 ${esc(myCue)}</div>`));
 
   const prevSets = lastPerformance(ex.name);
   const sug = suggestNext(ex, prevSets);
@@ -1473,6 +1502,41 @@ function openSwap(ei){
   });
 }
 
+const DIFFICULTY={easy:{label:"Easy",icon:"🟢"},right:{label:"About right",icon:"🔥"},hard:{label:"Hard",icon:"🟠"}};
+function difficultyText(value){ const d=DIFFICULTY[value]; return d?`${d.icon} ${d.label}`:""; }
+function openWorkoutSummary(finished,prs){
+  const muscles={}; finished.exercises.forEach(ex=>{ muscles[ex.muscle||"Other"]=(muscles[ex.muscle||"Other"]||0)+ex.sets.length; });
+  const plan=plannedWeeklySets(state.settings.planVariant||"his"), ws=weekStartTs(Date.now()), weekly=setsByMuscleBetween(ws,ws+7*86400000);
+  const planTotal=Object.values(plan).reduce((a,b)=>a+b,0), weekTotal=Object.keys(plan).reduce((n,k)=>n+(weekly[k]||0),0);
+  openSheet("Workout complete",body=>{
+    body.appendChild(el(`<div style="font-size:36px;text-align:center;margin:0 0 6px">${prs?"🏆":"💪"}</div>`));
+    body.appendChild(el(`<div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:14px">${esc(finished.name)}</div>`));
+    body.appendChild(el(`<div class="stat-grid">
+      <div class="stat"><div class="num">${fmtDur(finished.duration)}</div><div class="lbl">Duration</div></div>
+      <div class="stat"><div class="num">${workoutSets(finished)}</div><div class="lbl">Sets</div></div>
+      <div class="stat"><div class="num">${fmtNum(workoutVolume(finished)).toLocaleString()}</div><div class="lbl">${U()} volume</div></div>
+    </div>`));
+    if(prs) body.appendChild(el(`<div class="note-banner" style="text-align:center">🏆 ${prs} personal record${prs!==1?"s":""} in this workout</div>`));
+    body.appendChild(el(`<div class="section-label" style="margin:14px 0 4px">Muscle-group sets</div>`));
+    const muscleBox=el(`<div class="card" style="padding:4px 14px;margin-bottom:12px"></div>`);
+    Object.entries(muscles).sort((a,b)=>b[1]-a[1]).forEach(([mg,n])=>muscleBox.appendChild(el(`<div class="summary-muscle"><span>${esc(mg)}</span><b>${n} set${n!==1?"s":""}</b></div>`)));
+    body.appendChild(muscleBox);
+    body.appendChild(el(`<div class="load-result"><div class="load-main">Weekly plan · ${weekTotal} / ${planTotal} sets</div><div class="load-sub">Your muscle-volume targets already include this workout${deloadActive()?" and this week's deload adjustment":""}.</div></div>`));
+    if(state.settings.askDifficulty!==false){
+      body.appendChild(el(`<div class="section-label" style="margin:16px 0 4px">How did that feel?</div>`));
+      const diff=el(`<div class="difficulty-row"></div>`);
+      Object.entries(DIFFICULTY).forEach(([key,d])=>{ const b=el(`<button class="btn ${finished.difficulty===key?"primary":"ghost"}">${d.icon} ${d.label}</button>`);
+        b.onclick=()=>{ finished.difficulty=key; finished.editedAt=Date.now(); save("workouts"); diff.querySelectorAll("button").forEach(x=>x.className="btn ghost"); b.className="btn primary"; };
+        diff.appendChild(b); });
+      body.appendChild(diff);
+    }
+    body.appendChild(el(`<div class="section-label" style="margin:16px 0 6px">Session note</div>`));
+    const notes=el(`<textarea class="input" rows="2" placeholder="Energy, soreness, what to remember…" style="resize:vertical;font-family:inherit">${esc(finished.notes||"")}</textarea>`);
+    notes.onchange=()=>{ finished.notes=notes.value.trim(); finished.editedAt=Date.now(); save("workouts"); }; body.appendChild(notes);
+    const done=el(`<button class="btn good" style="margin-top:14px">Done</button>`); done.onclick=()=>{ finished.notes=notes.value.trim(); finished.editedAt=Date.now(); save("workouts"); closeSheet(); render(); }; body.appendChild(done);
+  });
+}
+
 function finishWorkout(){
   const w=state.active;
   const performed = w.exercises.map(e=>({ ...e, sets:e.sets.filter(s=>s.done && (s.weight!==""||s.reps!=="")) }))
@@ -1481,7 +1545,7 @@ function finishWorkout(){
   const duration = Date.now()-w.start;
   const end = isoToTs(w.date);   // chosen calendar date at current time-of-day
   const finished = { id:w.id, name:w.name||"Workout", start:end-duration, end,
-    duration, exercises:performed, notes:(w.notes||"").trim() };
+    duration, exercises:performed, notes:(w.notes||"").trim(), deload:!!w.deload, editedAt:Date.now() };
   const prs = finished.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.pr).length,0);
   state.workouts.unshift(finished);
   state.workouts.sort((a,b)=>b.end-a.end);   // keep newest-first even for back-dated logs
@@ -1491,9 +1555,8 @@ function finishWorkout(){
     state.plan.deferred=null; save("plan"); }
   state.active=null; save("active");
   stopTimer(); stopRest(); releaseWake();
-  const vol = fmtNum(workoutVolume(finished));
   setTab("home");
-  toast(`💪 Logged · ${workoutSets(finished)} sets · ${vol.toLocaleString()} ${U()}${prs?` · ${prs} PR${prs!==1?"s":""} 🏆`:""}`);
+  openWorkoutSummary(finished,prs);
 }
 
 function startTimer(){
@@ -1555,7 +1618,7 @@ function renderHistory(app){
       <div class="row">
         <div class="grow">
           <div class="title">${esc(w.name)}</div>
-          <div class="sub">${fmtDay(w.end)} · ${fmtDur(w.duration)} · ${w.exercises.length} ex</div>
+          <div class="sub">${fmtDay(w.end)} · ${fmtDur(w.duration)} · ${w.exercises.length} ex${w.difficulty?" · "+difficultyText(w.difficulty):""}${w.deload?" · 🌿 Deload":""}</div>
         </div>
         <div style="text-align:right"><div style="font-weight:800;color:var(--accent)">${fmtNum(workoutVolume(w)).toLocaleString()}</div><div class="pill">${U()} vol</div></div>
       </div></div>`);
@@ -1575,6 +1638,7 @@ function renderHistoryDetail(app,v){
   app.appendChild(header(w.name,{right:del}));
   const s=el(`<div class="screen"></div>`);
   s.appendChild(el(`<div class="muted" style="margin:0 2px 12px">${fmtDay(w.end)} · ${new Date(w.end).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</div>`));
+  if(w.difficulty||w.deload) s.appendChild(el(`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${w.difficulty?`<span class="chip accent">${esc(difficultyText(w.difficulty))}</span>`:""}${w.deload?'<span class="chip">🌿 Deload</span>':""}</div>`));
   s.appendChild(el(`<div class="stat-grid">
     <div class="stat"><div class="num">${fmtDur(w.duration)}</div><div class="lbl">Duration</div></div>
     <div class="stat"><div class="num">${workoutSets(w)}</div><div class="lbl">Sets</div></div>
@@ -1647,7 +1711,7 @@ function setsByMuscleBetween(from,to){
 function plannedWeeklySets(variant){
   const keys=new Set(Object.values(planFor(Date.now())));
   const m={};
-  ALL_PROGRAM.filter(d=>keys.has(d.key)).forEach(d=>d.ex.forEach(e=>{ m[e.muscle]=(m[e.muscle]||0)+((e[variant]&&e[variant][0])||0); }));
+  ALL_PROGRAM.filter(d=>keys.has(d.key)).forEach(d=>d.ex.forEach(e=>{ const sets=(e[variant]&&e[variant][0])||0; m[e.muscle]=(m[e.muscle]||0)+(deloadActive()?deloadSetCount(sets):sets); }));
   return m;
 }
 function muscleSetsCard(){
@@ -1658,7 +1722,7 @@ function muscleSetsCard(){
   const order=["Legs","Chest","Back","Shoulders","Arms","Core"];
   const cw=cycleWeekOf(Date.now());
   const card=el(`<div class="chart-card"><h4>Weekly sets by muscle</h4>
-    <div class="csub">Hard sets this week vs your ${variant==="his"?"His":"Hers"} plan · Week ${cw} (${cw===1?"A/B/C":"D/E/F"}) · resets Monday</div></div>`);
+    <div class="csub">Hard sets this week vs your ${variant==="his"?"His":"Hers"} ${deloadActive()?"deload ":""}plan · Week ${cw} (${cw===1?"A/B/C":"D/E/F"}) · resets Monday</div></div>`);
   order.forEach(mg=>{
     const done=cur[mg]||0, target=plan[mg]||0, prev=last[mg]||0;
     const hit=target>0&&done>=target;
@@ -1671,6 +1735,41 @@ function muscleSetsCard(){
   Object.keys({...cur,...last}).filter(mg=>!order.includes(mg)).sort().forEach(mg=>{
     const done=cur[mg]||0, prev=last[mg]||0; if(!done&&!prev) return;
     card.appendChild(el(`<div class="mrow"><div class="mtop"><span>${esc(mg)}</span><span class="mnum"><b style="color:var(--text)">${done}</b> sets · last wk ${prev}</span></div></div>`));
+  });
+  return card;
+}
+
+const FEATURED_LIFTS=["Back Squat","Front Squat","Barbell Bench Press","Deadlift","Romanian Deadlift","Overhead Press","Barbell Row","Pull-Up","Chin-Up","DB Goblet Squat","DB Front Squat","Flat DB Bench Press","Incline DB Press","DB Romanian Deadlift","One-Arm DB Row","DB Overhead Press","Bulgarian Split Squat"];
+function strengthRecord(name){
+  let bestW=0,bestE=0,bestReps=0,bestSet=null,last=0; const repBests={};
+  state.workouts.forEach(w=>w.exercises.filter(e=>e.name===name).forEach(ex=>{ last=Math.max(last,w.end); ex.sets.forEach(s=>{
+    const wt=Number(s.weight)||0,reps=Number(s.reps)||0,e=epley(wt,reps); bestW=Math.max(bestW,wt); bestReps=Math.max(bestReps,reps);
+    if(e>bestE){ bestE=e; bestSet={weight:wt,reps}; }
+    if(wt&&reps>0&&reps<=20) repBests[reps]=Math.max(repBests[reps]||0,wt);
+  }); }));
+  return last?{name,bestW,bestE,bestReps,bestSet,last,repBests}:null;
+}
+function openStrengthRecord(record){
+  openSheet(record.name,body=>{
+    const main=record.bestE>0?`${fmtNum(record.bestE)} ${U()} est 1RM`:`${record.bestReps} reps`;
+    body.appendChild(el(`<div class="hero" style="margin-bottom:12px"><h2>${esc(main)}</h2><p>Heaviest load · ${fmtNum(record.bestW)} ${U()} · last trained ${fmtDate(record.last)}</p></div>`));
+    const reps=Object.keys(record.repBests).map(Number).sort((a,b)=>a-b);
+    if(reps.length){ body.appendChild(el(`<div class="section-label" style="margin:10px 0 5px">Rep records</div>`));
+      const box=el(`<div class="card" style="padding:4px 14px"></div>`); reps.forEach(r=>box.appendChild(el(`<div class="summary-muscle"><span>${r} rep${r!==1?"s":""}</span><b>${fmtNum(record.repBests[r])} ${U()}</b></div>`))); body.appendChild(box); }
+    const pts=[...state.workouts].sort((a,b)=>a.end-b.end).map(w=>{ const ex=w.exercises.find(e=>e.name===record.name); if(!ex)return null; const y=Math.max(...ex.sets.map(s=>epley(s.weight,s.reps))); return y?{x:w.end,y}:null; }).filter(Boolean);
+    if(pts.length){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 5px">Strength trend</div>`)); body.appendChild(lineChart(pts)); }
+  });
+}
+function strengthRecordsCard(){
+  let records=FEATURED_LIFTS.map(strengthRecord).filter(Boolean);
+  if(!records.length){
+    const names=[...new Set(state.workouts.flatMap(w=>w.exercises.map(e=>e.name)))]; records=names.map(strengthRecord).filter(r=>r&&r.bestE>0).sort((a,b)=>b.last-a.last).slice(0,6);
+  }
+  const card=el(`<div class="chart-card"><h4>Strength records</h4><div class="csub">Key lifts · tap one for rep records and its trend</div></div>`);
+  if(!records.length){ card.appendChild(el(`<div class="muted" style="padding:8px 0">Complete weighted sets to build your record board.</div>`)); return card; }
+  records.slice(0,8).forEach(r=>{ const value=r.bestE>0?`${fmtNum(r.bestE)} ${U()}`:`${r.bestReps} reps`;
+    const row=el(`<div class="record-row row" style="cursor:pointer"><div class="grow"><div class="title">${esc(r.name)}</div><div class="sub">${r.bestSet?`Best set ${fmtNum(r.bestSet.weight)} × ${r.bestSet.reps}`:`Best bodyweight set · ${r.bestReps} reps`} · ${fmtDate(r.last)}</div></div><div style="text-align:right"><div style="font-weight:800;color:var(--accent)">${esc(value)}</div><div class="pill">${r.bestE>0?"est 1RM":"best"}</div></div></div>`);
+    row.onclick=()=>openStrengthRecord(r); card.appendChild(row);
   });
   return card;
 }
@@ -1690,6 +1789,7 @@ function renderProgress(app){
 
   // Weekly sets per muscle vs plan
   s.appendChild(muscleSetsCard());
+  s.appendChild(strengthRecordsCard());
 
   // Volume per workout (line)
   const volPts=hist.map(w=>({x:w.end, y:workoutVolume(w)}));
@@ -1723,7 +1823,7 @@ function renderProgress(app){
   sel.onchange=drawEx; card.appendChild(sel); card.appendChild(holder); s.appendChild(card); drawEx();
 
   // Personal records table
-  s.appendChild(el(`<div class="section-label">Personal Records</div>`));
+  s.appendChild(el(`<div class="section-label">All Exercise Records</div>`));
   const prs=allEx.map(name=>{
     let bestW=0,bestE=0;
     state.workouts.forEach(w=>w.exercises.filter(e=>e.name===name).forEach(e=>e.sets.forEach(sx=>{
@@ -1929,6 +2029,14 @@ function openExerciseInfo(name){
       ta.onchange=()=>{ ex.desc=ta.value.trim(); save("exercises"); };
       body.appendChild(ta);
     }
+    if(ex){
+      body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">My personal cue</div>`));
+      const cue=el(`<textarea class="input" rows="2" placeholder="e.g. Brace before the descent; bench notch 3…" style="resize:vertical;font-family:inherit">${esc(ex.personalCue||"")}</textarea>`);
+      body.appendChild(cue);
+      const saveCue=el(`<button class="btn ghost sm" style="width:100%;margin-top:8px">Save personal cue</button>`);
+      saveCue.onclick=()=>{ ex.personalCue=cue.value.trim(); save("exercises"); closeSheet(); render(); toast(ex.personalCue?"Personal cue saved":"Personal cue cleared"); };
+      body.appendChild(saveCue);
+    }
     const subs=suggestedSubs(name);
     if(subs.length){
       body.appendChild(el(`<div class="section-label" style="margin:16px 0 6px">Suggested substitutions</div>`));
@@ -2099,6 +2207,7 @@ function renderSettings(app){
   s.appendChild(el(`<div class="section-label">During a Workout</div>`));
   const wCard=el(`<div class="card"></div>`);
   wCard.appendChild(toggleRow("Keep screen awake", state.settings.keepAwake!==false, on=>{ state.settings.keepAwake=on; save("settings"); if(on&&state.active&&peek().screen==="workout") acquireWake(); else if(!on) releaseWake(); }));
+  wCard.appendChild(toggleRow("Ask how the workout felt", state.settings.askDifficulty!==false, on=>{ state.settings.askDifficulty=on; save("settings"); }));
   s.appendChild(wCard);
 
   // library
