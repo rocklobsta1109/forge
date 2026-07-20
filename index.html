@@ -140,6 +140,14 @@
     padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--accent-2);line-height:1.4;}
   .cue{font-size:12.5px;color:var(--muted);margin:-2px 0 10px;line-height:1.4;}
   .suggest{font-size:12.5px;color:var(--accent-2);font-weight:600;margin:-2px 0 10px;line-height:1.4;}
+  .exercise-tools{display:flex;gap:8px;margin:-2px 0 10px;}
+  .exercise-tools .btn{flex:1;}
+  .load-result{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:12px;}
+  .load-result .load-main{font-weight:800;color:var(--accent-2);font-size:16px;}
+  .load-result .load-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+  .plate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+  .plate-grid label{font-size:12px;color:var(--muted);font-weight:700;}
+  .plate-grid input{margin-top:4px;text-align:center;}
 
   /* ---------- Exercise info (how-to) ---------- */
   .infobtn{width:26px;height:26px;flex:0 0 auto;border:none;border-radius:99px;background:var(--surface-3);
@@ -469,6 +477,88 @@ function equipFor(name){
   return null;   // custom / unknown → shows under "All" only
 }
 
+/* ---------- Curated substitutions (first choices shown before the full pool) ---------- */
+const SUBSTITUTIONS={
+  "Back Squat":[["Front Squat","More upright and quad-focused."],["DB Goblet Squat","Rack-free, simple fallback."],["Heels-Elevated Goblet Squat","Lower-load quad option."]],
+  "DB Goblet Squat":[["Back Squat","Best option when you want to load heavy."],["Front Squat","Upright barbell alternative."],["Heels-Elevated Goblet Squat","More quad emphasis with the same DB."]],
+  "DB Front Squat":[["Front Squat","Barbell version with the same upright pattern."],["Back Squat","Heavier bilateral squat option."],["DB Goblet Squat","Simpler rack-free fallback."]],
+  "Bulgarian Split Squat":[["DB Reverse Lunge","Single-leg work with less balance demand."],["Barbell Reverse Lunge","Load both legs from the rack."],["DB Step-Up","Knee-friendly single-leg alternative."]],
+  "DB Reverse Lunge":[["Barbell Reverse Lunge","Heavier bilateral loading."],["Bulgarian Split Squat","More stable rear-foot-elevated option."],["DB Step-Up","Controlled single-leg substitute."]],
+  "DB Romanian Deadlift":[["Romanian Deadlift","Barbell version for heavier loading."],["Deadlift","Full-range pull from the floor."],["Barbell Hip Thrust","Glute-focused posterior-chain option."]],
+  "Romanian Deadlift":[["DB Romanian Deadlift","Lighter, easier-to-control version."],["Deadlift","Full-range floor pull."],["Barbell Hip Thrust","Less hamstring stretch, more glute focus."]],
+  "Deadlift":[["Romanian Deadlift","Less demanding from the floor."],["Rack Pull","Partial range from the safeties."],["DB Romanian Deadlift","Dumbbell fallback."]],
+  "Barbell Hip Thrust":[["DB Hip Thrust","Same motion without loading the bar."],["Weighted Glute Bridge","Floor-based option."],["Romanian Deadlift","Posterior-chain substitute without a bench setup."]],
+  "Weighted Glute Bridge":[["Barbell Hip Thrust","Best heavy progression option."],["DB Hip Thrust","Bench-supported DB version."],["Single-Leg Glute Bridge","No-load alternative."]],
+  "Flat DB Bench Press":[["Barbell Bench Press","Best heavy bilateral press."],["DB Floor Press","Shoulder-friendly shorter range."],["Push-Up","No-bench fallback."]],
+  "Barbell Bench Press":[["Flat DB Bench Press","Independent-arm alternative."],["DB Floor Press","Safe shorter-range fallback."],["Push-Up","No-rack option."]],
+  "Incline DB Press":[["Barbell Incline Press","Heavier upper-chest option."],["Flat DB Bench Press","Flat-press fallback."],["Feet-Elevated Push-Up","Portable upper-chest option."]],
+  "DB Bench Fly":[["Incline DB Squeeze Press","Pressing option with a chest squeeze."],["Flat DB Bench Press","More loadable chest movement."],["Push-Up","Simple fallback."]],
+  "One-Arm DB Row":[["Barbell Row","Heavy bilateral row."],["Chest Supported Row","Less lower-back fatigue."],["Inverted Row","Pull-up-bar alternative."]],
+  "Barbell Row":[["One-Arm DB Row","Bench-supported unilateral alternative."],["Pendlay Row","Dead-stop power-row option."],["Pull-Up","Vertical-pull alternative."]],
+  "Chest Supported Row":[["One-Arm DB Row","More load and range freedom."],["Barbell Row","Heavy bilateral row."],["Pull-Up","Vertical-pull substitution."]],
+  "Pull-Up":[["Chin-Up","More biceps assistance."],["Inverted Row","Scalable bar-in-rack option."],["One-Arm DB Row","Dumbbell fallback."]],
+  "Chin-Up":[["Pull-Up","More lat-focused grip."],["Inverted Row","Scalable rack alternative."],["One-Arm DB Row","Dumbbell fallback."]],
+  "DB Overhead Press":[["Overhead Press","Barbell strength option."],["DB Push Press","Use leg drive to keep load moving."],["Pike Push-Up","Bodyweight fallback."]],
+  "Overhead Press":[["DB Overhead Press","Use if the 45 lb bar is too heavy."],["Barbell Push Press","Leg-drive alternative."],["Pike Push-Up","Bodyweight fallback."]],
+  "DB Lateral Raise":[["Leaning Lateral Raise","Longer tension at the bottom."],["Seated Lateral Raise","Removes momentum."],["Rear Delt Fly","Rear-delt-focused alternative."]],
+  "DB Bicep Curl":[["Barbell Curl","Heavier bilateral curl."],["Hammer Curl","More forearm and brachialis work."],["Chin-Up","Compound biceps-focused pull."]],
+  "Overhead DB Tricep Extension":[["DB Skullcrusher","Bench-supported triceps option."],["Close-Grip Bench Press","Heavier compound triceps press."],["Close-Grip Push-Up","Bodyweight fallback."]],
+  "DB Skullcrusher":[["Overhead DB Tricep Extension","No-bench version."],["Close-Grip Bench Press","Heavier compound option."],["Close-Grip Push-Up","Bodyweight fallback."]],
+  "DB Anchored Russian Twist":[["DB Wood Chop","Standing diagonal rotation."],["DB Plank Pull-Through","Anti-rotation core work."],["Side Plank Reach-Through","Bodyweight rotational option."]],
+  "DB Plank Pull-Through":[["DB Anchored Russian Twist","Seated rotation option."],["Dead Bug","Lower-back-friendly core stability."],["Plank","Simple no-load alternative."]],
+  "Barbell Rollout":[["Hollow Body Hold","No-equipment anti-extension work."],["Plank","Simpler anti-extension option."],["Dead Bug","Most scalable core substitute."]],
+};
+function modeAllowsEquipment(equipment,mode){
+  if(mode==="db") return ["dumbbell","bodyweight","pullup"].includes(equipment);
+  if(mode==="bb") return ["barbell","bodyweight","pullup"].includes(equipment);
+  return equipment!=="gym";
+}
+function suggestedSubs(name,mode=equipMode()){
+  return (SUBSTITUTIONS[name]||[]).map(([n,reason])=>{
+    const ex=state.exercises.find(x=>x.name===n); return ex&&{...ex,reason};
+  }).filter(Boolean).filter(ex=>modeAllowsEquipment(ex.equipment,mode));
+}
+
+/* ---------- Barbell warm-up + plate planning ---------- */
+const DEFAULT_PLATE_PAIRS={45:1,35:1,25:1,10:1,5:2,2.5:2};
+function isBarbell(ex){ const lib=state.exercises.find(x=>x.name===ex.name); return (lib&&lib.equipment)==="barbell"; }
+function configuredBarWeight(){ return U()==="kg" ? 20 : (Number(state.settings.barWeight)||45); }
+function platePairs(){ return {...DEFAULT_PLATE_PAIRS,...(state.settings.platePairs||{})}; }
+function suggestedWorkingWeight(ex){
+  const sug=suggestNext(ex,lastPerformance(ex.name));
+  if(sug&&sug.type==="weight") return sug.weight;
+  const prev=lastPerformance(ex.name); return prev&&Math.max(...prev.map(s=>Number(s.weight)||0))||configuredBarWeight();
+}
+function roundLoad(n){ const step=U()==="kg"?2.5:5; return Math.round(n/step)*step; }
+function warmupSetsFor(ex,work){
+  const bar=configuredBarWeight(), target=Number(work)||bar;
+  if(target<=bar+5) return [{weight:bar,reps:8}];
+  const raw=[bar,roundLoad(target*.55),roundLoad(target*.72),roundLoad(target*.86)];
+  const seen=new Set();
+  return raw.filter(w=>w<target&&w>=bar&&!seen.has(w)&&(seen.add(w),true)).map((weight,i,a)=>({weight,reps:i===0?8:i===a.length-1?1:i===1?5:3}));
+}
+function bestPlateLoad(perSide){
+  const available=platePairs();
+  const vals=Object.keys(available).map(Number).filter(v=>available[v]>0).sort((a,b)=>b-a);
+  const goal=Math.round(perSide*2), counts={}; let best=null;
+  function walk(i,left,plates){
+    if(left===0){ if(!best||plates<best.plates) best={plates,counts:{...counts}}; return; }
+    if(i>=vals.length||left<0||(best&&plates>=best.plates)) return;
+    const v=vals[i], max=Math.min(Number(available[v])||0,Math.floor(left/(v*2)));
+    for(let n=max;n>=0;n--){ if(n) counts[v]=n; else delete counts[v]; walk(i+1,left-n*v*2,plates+n); }
+    delete counts[v];
+  }
+  walk(0,goal,0); return best;
+}
+function platePlan(total){
+  const bar=configuredBarWeight(), target=Number(total);
+  if(!target||target<bar) return {error:`Enter a working weight of at least ${fmtNum(bar)} lb.`};
+  const per=(target-bar)/2, result=bestPlateLoad(per);
+  if(!result) return {error:`${fmtNum(target)} lb cannot be made from the configured plates.`};
+  const text=Object.entries(result.counts).sort((a,b)=>Number(b[0])-Number(a[0])).map(([v,n])=>n>1?`${n} × ${v}`:v).join(" + ")||"bar only";
+  return {per,text,bar};
+}
+
 /* ---------- Equipment mode (Dumbbell / Combo / Barbell) ----------
    One authored routine, three implements: at start time each exercise resolves
    through its movement pool to the anchor for the chosen mode.
@@ -516,6 +606,15 @@ function mapExerciseForMode(name, mode){
   }
   if(!a||!a.bb) return name;
   return (mode==="bb"||a.big)?a.bb:name;
+}
+function targetForMappedExercise(target,source,mapped){
+  let t=String(target||""); if(source===mapped) return t;
+  const arm=/One-Arm|Single-Arm/.test(mapped), leg=/Single-Leg/.test(mapped);
+  if(!arm) t=t.replace(/\s*\/\s*arm\b/i,"");
+  if(!leg&&!/Lunge|Split Squat|Step-Up/.test(mapped)) t=t.replace(/\s*\/\s*leg\b/i,"");
+  if(arm&&!/\/\s*arm\b/i.test(t)) t+=" / arm";
+  if(leg&&!/\/\s*leg\b/i.test(t)) t+=" / leg";
+  return t.trim();
 }
 function equipMode(){ return state.settings.equipMode||"db"; }
 
@@ -687,7 +786,7 @@ function knockPenalty(){ const p=state.plan; if(p.penaltySets>0){ p.penaltySets-
 
 /* ---------- App state ---------- */
 const state = {
-  settings: DB.get("settings", {unit:"lb", restDefault:90}),
+  settings: DB.get("settings", {unit:"lb", restDefault:-1, barWeight:45, platePairs:DEFAULT_PLATE_PAIRS}),
   exercises: DB.get("exercises", DEFAULT_EXERCISES),
   routines: DB.get("routines", []),
   workouts: DB.get("workouts", []),     // completed, newest first
@@ -701,6 +800,12 @@ if(!state.bodyweights) state.bodyweights=[];
 if(!state.deleted) state.deleted=[];
 function save(key){ DB.set(key, state[key]); if(key!=="active"){ localStorage.setItem("forge_updatedAt", String(Date.now())); schedulePush(); } }
 const U = () => state.settings.unit;
+/* v14: replace the old one-size-fits-all rest setting with adaptive presets. */
+if(!state.settings.restPresetV1){
+  state.settings.restDefault=-1; state.settings.restPresetV1=true; save("settings");
+}
+if(!state.settings.platePairs){ state.settings.platePairs={...DEFAULT_PLATE_PAIRS}; save("settings"); }
+if(!state.settings.barWeight){ state.settings.barWeight=45; save("settings"); }
 
 /* ---------- Cloud backup (sync to the home server) ---------- */
 const SYNC_KEYS = ["settings","exercises","routines","workouts","plan","bodyweights","deleted"];
@@ -1126,7 +1231,7 @@ function startFromRoutine(rid, planKey){
       const lib = mapped!==re.name && state.exercises.find(x=>x.name===mapped);
       return { id:uid(), name:mapped, muscle:(lib&&lib.muscle)||re.muscle,
         note: mapped===re.name ? (re.note||"") : "",   // old form cue doesn't apply; ⓘ has the how-to
-        target:re.reps||"",
+        target:targetForMappedExercise(re.reps||"",re.name,mapped),
         sets: Array.from({length:re.sets||1}, ()=>({weight:"",reps:"",done:false})) };
     })
   };
@@ -1215,6 +1320,12 @@ function exerciseBlock(ex,ei){
   const prevSets = lastPerformance(ex.name);
   const sug = suggestNext(ex, prevSets);
   if(sug) blk.appendChild(el(`<div class="suggest">📈 ${esc(sug.text)}</div>`));
+  if(isBarbell(ex)){
+    const tools=el(`<div class="exercise-tools"></div>`);
+    const warm=el(`<button class="btn ghost sm">🔥 Warm up</button>`); warm.onclick=()=>openWarmup(ex);
+    const plates=el(`<button class="btn ghost sm">⚖️ Plates</button>`); plates.onclick=()=>openPlateCalculator(ex);
+    tools.appendChild(warm); tools.appendChild(plates); blk.appendChild(tools);
+  }
   const table = el(`<div class="set-table"></div>`);
   table.appendChild(el(`<div class="set-hd"><span>SET</span><span style="text-align:center">PREV</span><span style="text-align:center">${U().toUpperCase()}</span><span style="text-align:center">REPS</span><span></span></div>`));
 
@@ -1251,7 +1362,7 @@ function exerciseBlock(ex,ei){
         set.pr = hb.e>0 && ((e1>hb.e+0.001) || (wt>hb.w));
         if(set.pr){ toast("🏆 New PR · "+ex.name); if(navigator.vibrate)navigator.vibrate([60,40,120]); }
         else if(navigator.vibrate){ navigator.vibrate(30); }
-        if(state.settings.restDefault>0) startRest(state.settings.restDefault);
+        const rest=restSecondsFor(ex); if(rest>0) startRest(rest,ex.name);
       } else { set.pr=false; }
       save("active"); render();
     };
@@ -1264,6 +1375,35 @@ function exerciseBlock(ex,ei){
   addSet.onclick=()=>{ const last=ex.sets[ex.sets.length-1]; ex.sets.push({weight:last?last.weight:"",reps:last?last.reps:"",done:false}); save("active"); render(); };
   blk.appendChild(addSet);
   return blk;
+}
+
+function openWarmup(ex){
+  let work=suggestedWorkingWeight(ex);
+  openSheet("Warm-up sets",body=>{
+    body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px">${esc(ex.name)} · Advisory warm-up sets only — they are not logged as working sets.</div>`));
+    const field=el(`<div class="field"><label>Working weight (${U()})</label><input class="input" inputmode="decimal" value="${esc(fmtNum(work))}"/></div>`);
+    body.appendChild(field); const out=el(`<div></div>`); body.appendChild(out);
+    const draw=()=>{ work=Number($("input",field).value)||configuredBarWeight(); const steps=warmupSetsFor(ex,work);
+      out.innerHTML=""; out.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Ramp</div>`));
+      steps.forEach((s,i)=>out.appendChild(el(`<div class="load-result"><div class="load-main">${i===0?"Empty bar":"Warm-up"} · ${fmtNum(s.weight)} ${U()} × ${s.reps}</div><div class="load-sub">Rest about ${i===steps.length-1?"60–90":"45–60"} seconds, then continue.</div></div>`)));
+      out.appendChild(el(`<div class="muted" style="font-size:12px;margin:12px 2px 4px">Then begin your ${fmtNum(work)} ${U()} working sets.</div>`)); };
+    $("input",field).oninput=draw; draw();
+  });
+}
+
+function openPlateCalculator(ex){
+  let target=suggestedWorkingWeight(ex);
+  openSheet("Plate calculator",body=>{
+    body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px">${esc(ex.name)} · Uses your configured bar and plate pairs.</div>`));
+    if(U()!=="lb"){ body.appendChild(el(`<div class="note-banner">Switch Weight unit to lb in Settings to use your lb plate inventory.</div>`)); return; }
+    const field=el(`<div class="field"><label>Total bar weight (lb)</label><input class="input" inputmode="decimal" value="${esc(fmtNum(target))}"/></div>`);
+    body.appendChild(field); const out=el(`<div></div>`); body.appendChild(out);
+    const draw=()=>{ target=Number($("input",field).value)||0; const p=platePlan(target); out.innerHTML="";
+      if(p.error){ out.appendChild(el(`<div class="note-banner">${esc(p.error)}</div>`)); return; }
+      out.appendChild(el(`<div class="load-result"><div class="load-main">Each side · ${esc(p.text)}</div><div class="load-sub">${fmtNum(p.bar)} lb bar + ${fmtNum(p.per)} lb per side = ${fmtNum(target)} lb total</div></div>`));
+      out.appendChild(el(`<div class="muted" style="font-size:12px;margin:12px 2px 4px">Load the same plates on both sides, then secure the collars.</div>`)); };
+    $("input",field).oninput=draw; draw();
+  });
 }
 
 function openExerciseMenu(ei){
@@ -1279,6 +1419,16 @@ function openExerciseMenu(ei){
       {t:"Remove exercise", danger:true, f:()=>{ w.exercises.splice(ei,1); save("active"); render(); closeSheet(); }},
     ].filter(Boolean);
     opts.forEach(o=>{ const b=el(`<button class="btn ${o.danger?"danger":"ghost"}" style="margin-bottom:8px">${o.t}</button>`); b.onclick=o.f; body.appendChild(b); });
+  });
+}
+
+function renderSuggestedSubstitutes(body,ex,onPick){
+  const picks=suggestedSubs(ex.name);
+  if(!picks.length) return;
+  body.appendChild(el(`<div class="section-label" style="margin:4px 0 6px">Suggested swaps</div>`));
+  picks.forEach(o=>{
+    const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(o.name)}</div><div class="sub">${esc(o.reason)}</div></div>${equipTagHTML(o)}<span style="font-size:20px;color:var(--faint)">›</span></div>`);
+    row.onclick=()=>onPick(o); body.appendChild(row);
   });
 }
 
@@ -1302,6 +1452,8 @@ function openSwap(ei){
   let eqFilter="all";
   openSheet("Swap movement", body=>{
     if(lbl) body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px;font-size:13px">Same target & motion · <b style="color:var(--accent-2)">${esc(lbl)}</b></div>`));
+    renderSuggestedSubstitutes(body,ex,o=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; save("active"); closeSheet(); render(); toast("Swapped → "+o.name); });
+    if(suggestedSubs(ex.name).length) body.appendChild(el(`<div class="section-label" style="margin:16px 0 6px">All same-pattern options</div>`));
     body.appendChild(equipChipRow(eqFilter, v=>{ eqFilter=v; drawAlts(); }));
     const listWrap=el(`<div></div>`); body.appendChild(listWrap);
     const cur=state.exercises.find(x=>x.name===ex.name);
@@ -1352,9 +1504,23 @@ function startTimer(){
 function stopTimer(){ if(timerInt){clearInterval(timerInt); timerInt=null;} }
 
 /* ---------- Rest timer ---------- */
-let restInt=null, restEnd=0;
-function startRest(sec){
+let restInt=null, restEnd=0, restLabel="";
+function adaptiveRestSeconds(ex){
+  const lib=state.exercises.find(x=>x.name===ex.name)||ex;
+  const range=parseRepRange(ex.target), reps=range?range.hi:10;
+  if(lib.equipment==="barbell") return reps<=6?180:reps<=8?150:reps<=12?120:90;
+  if(["Arms","Shoulders","Core"].includes(ex.muscle)) return reps>=15?45:60;
+  if(lib.equipment==="bodyweight"||lib.equipment==="pullup") return reps<=8?120:60;
+  return reps<=8?120:reps<=12?90:60;
+}
+function restSecondsFor(ex){
+  const selected=Number(state.settings.restDefault);
+  if(selected===0) return 0;
+  return selected>0?selected:adaptiveRestSeconds(ex);
+}
+function startRest(sec,label=""){
   restEnd=Date.now()+sec*1000;
+  restLabel=label;
   let bar=document.getElementById("restBar");
   if(!bar){ bar=el(`<div id="restBar" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);z-index:55;background:var(--surface-3);border:1px solid var(--accent);border-radius:99px;padding:9px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)"></div>`);
     document.body.appendChild(bar); }
@@ -1362,13 +1528,13 @@ function startRest(sec){
     if(left<=0){ stopRest(); beep(2); if(navigator.vibrate)navigator.vibrate([120,60,120]);
       if(document.hidden) notifyRestOver();   // user is in another app / screen off
       return; }
-    bar.innerHTML=`<span style="font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums">⏱ ${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}</span>`;
+    bar.innerHTML=`<span style="font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums">⏱ ${restLabel?esc(restLabel)+" · ":""}${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}</span>`;
     const skip=el(`<span style="color:var(--muted);font-size:13px;font-weight:700;cursor:pointer">Skip</span>`); skip.onclick=stopRest; bar.appendChild(skip);
     const plus=el(`<span style="color:var(--accent-2);font-size:13px;font-weight:700;cursor:pointer">+30s</span>`); plus.onclick=()=>{restEnd+=30000;}; bar.appendChild(plus);
   };
   clearInterval(restInt); upd(); restInt=setInterval(upd,250);
 }
-function stopRest(){ clearInterval(restInt); restInt=null; const b=document.getElementById("restBar"); if(b)b.remove(); }
+function stopRest(){ clearInterval(restInt); restInt=null; restLabel=""; const b=document.getElementById("restBar"); if(b)b.remove(); }
 
 /* ============================================================
    HISTORY
@@ -1763,6 +1929,11 @@ function openExerciseInfo(name){
       ta.onchange=()=>{ ex.desc=ta.value.trim(); save("exercises"); };
       body.appendChild(ta);
     }
+    const subs=suggestedSubs(name);
+    if(subs.length){
+      body.appendChild(el(`<div class="section-label" style="margin:16px 0 6px">Suggested substitutions</div>`));
+      subs.forEach(o=>body.appendChild(el(`<div class="row" style="padding:7px 2px"><div class="grow"><div style="font-weight:700;font-size:14px">${esc(o.name)}</div><div class="sub">${esc(o.reason)}</div></div>${equipTagHTML(o)}</div>`)));
+    }
     const prev=lastPerformance(name), hb=historicalBest(name);
     if(prev||hb.e>0){
       body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Your numbers</div>`));
@@ -1886,11 +2057,27 @@ function renderSettings(app){
     b.onclick=()=>{ state.settings.unit=u; save("settings"); render(); }; seg.appendChild(b); });
   uCard.appendChild(seg); s.appendChild(uCard);
 
+  // barbell setup
+  s.appendChild(el(`<div class="section-label">Barbell Setup</div>`));
+  const barbellCard=el(`<div class="card"></div>`);
+  barbellCard.appendChild(el(`<div class="row"><div class="grow"><div class="title">Plate calculator</div><div class="sub">Set the bar reference and how many matched plate pairs you own.</div></div></div>`));
+  const barField=el(`<div class="field" style="margin-top:10px"><label>Bar reference weight (lb)</label><select class="input"><option value="45" ${configuredBarWeight()===45?"selected":""}>45 lb — standard plate math</option><option value="44" ${configuredBarWeight()===44?"selected":""}>44 lb — exact 20 kg bar</option></select></div>`);
+  $("select",barField).onchange=()=>{ state.settings.barWeight=Number($("select",barField).value); save("settings"); };
+  barbellCard.appendChild(barField);
+  barbellCard.appendChild(el(`<div class="section-label" style="margin:14px 0 2px">Matched plate pairs</div>`));
+  const grid=el(`<div class="plate-grid"></div>`); const pairs=platePairs();
+  [45,35,25,10,5,2.5].forEach(weight=>{
+    const cell=el(`<label>${weight} lb pairs<input class="input" inputmode="numeric" value="${esc(Math.max(0,Number(pairs[weight])||0))}"/></label>`);
+    $("input",cell).onchange=()=>{ const p=platePairs(); p[weight]=Math.max(0,Math.floor(Number($("input",cell).value)||0)); state.settings.platePairs=p; save("settings"); };
+    grid.appendChild(cell);
+  });
+  barbellCard.appendChild(grid); s.appendChild(barbellCard);
+
   // rest timer
   s.appendChild(el(`<div class="section-label">Rest Timer</div>`));
   const rCard=el(`<div class="card"></div>`);
-  rCard.appendChild(el(`<div class="row"><div class="grow"><div class="title">Auto rest timer</div><div class="sub">Starts when you complete a set. 0 = off.</div></div></div>`));
-  const rsel=el(`<select class="input" style="margin-top:10px">${[0,30,45,60,90,120,150,180].map(n=>`<option value="${n}" ${state.settings.restDefault===n?"selected":""}>${n===0?"Off":n+"s"}</option>`).join("")}</select>`);
+  rCard.appendChild(el(`<div class="row"><div class="grow"><div class="title">Auto rest timer</div><div class="sub">Adaptive uses the movement, equipment, and target reps. Choose a fixed time to override it.</div></div></div>`));
+  const rsel=el(`<select class="input" style="margin-top:10px"><option value="-1" ${Number(state.settings.restDefault)===-1?"selected":""}>Adaptive (recommended)</option>${[0,30,45,60,90,120,150,180].map(n=>`<option value="${n}" ${Number(state.settings.restDefault)===n?"selected":""}>${n===0?"Off":n+"s"}</option>`).join("")}</select>`);
   rsel.onchange=()=>{ state.settings.restDefault=Number(rsel.value); save("settings"); }; rCard.appendChild(rsel);
   // toggle rows inside rest card
   rCard.appendChild(toggleRow("Sound when rest ends", state.settings.soundOn!==false, on=>{ state.settings.soundOn=on; save("settings"); if(on) beep(1); }));
