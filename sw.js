@@ -1,6 +1,6 @@
 /* Forge service worker — network-first so updates show up promptly,
    with a cache fallback so it still works offline. */
-const CACHE = "forge-v15";
+const CACHE = "forge-v17";
 const ASSETS = [
   "./",
   "./index.html",

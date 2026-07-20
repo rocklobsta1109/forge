@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-<meta name="theme-color" content="#0a0c10" />
+<meta name="theme-color" content="#090b0e" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Forge" />
@@ -12,12 +12,12 @@
 <title>Forge — Workout Tracker</title>
 <style>
   :root{
-    --bg:#0a0c10; --surface:#14181f; --surface-2:#1c222b; --surface-3:#232b36;
-    --border:#262d38; --text:#e8edf4; --muted:#8b95a5; --faint:#5c6675;
-    --accent:#ff6a3d; --accent-2:#ffa07a; --accent-dim:rgba(255,106,61,.14);
-    --good:#3ddc84; --good-dim:rgba(61,220,132,.14); --danger:#ff4d5e;
-    --radius:16px; --radius-sm:11px;
-    --shadow:0 8px 30px rgba(0,0,0,.45);
+    --bg:#090b0e; --surface:#12161b; --surface-2:#191e25; --surface-3:#222933;
+    --border:#2a3039; --hairline:rgba(241,236,228,.09); --text:#f1ece4; --muted:#a39c92; --faint:#716b64;
+    --accent:#d98a55; --accent-2:#efb07d; --accent-dim:rgba(217,138,85,.14);
+    --good:#68c89a; --good-dim:rgba(104,200,154,.13); --danger:#f06d75;
+    --radius:18px; --radius-sm:12px;
+    --shadow:0 18px 50px rgba(0,0,0,.38); --shadow-soft:0 8px 24px rgba(0,0,0,.22);
     --safe-top:env(safe-area-inset-top,0px);
     --safe-bottom:env(safe-area-inset-bottom,0px);
     --nav-h:64px;
@@ -25,77 +25,84 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
   body{
-    background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:
+      radial-gradient(circle at 50% -180px,rgba(217,138,85,.10),transparent 430px),
+      var(--bg); color:var(--text);
+    font-family:"Avenir Next",Avenir,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     font-size:16px; line-height:1.45; overscroll-behavior-y:none;
     -webkit-font-smoothing:antialiased;
   }
   #app{max-width:560px;margin:0 auto;min-height:100%;position:relative;}
+  button,input,select,textarea{font:inherit;}
+  button{touch-action:manipulation;}
+  .icon{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;}
+  .icon.sm{width:16px;height:16px}.icon.lg{width:24px;height:24px}
 
   /* ---------- Header ---------- */
   .topbar{
     position:sticky;top:0;z-index:30;
     padding:calc(var(--safe-top) + 10px) 14px 10px;
-    background:linear-gradient(180deg,var(--bg) 70%,rgba(10,12,16,.0));
-    backdrop-filter:blur(8px);
+    background:linear-gradient(180deg,rgba(9,11,14,.96) 72%,rgba(9,11,14,.70));
+    backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.025);
     display:flex;align-items:center;gap:10px;min-height:52px;
   }
-  .topbar h1{font-size:19px;font-weight:800;letter-spacing:.2px;margin:0;flex:1;
+  .topbar h1{font-size:18px;font-weight:800;letter-spacing:.15px;margin:0;flex:1;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .iconbtn{
     width:40px;height:40px;flex:0 0 auto;border:none;border-radius:12px;
-    background:var(--surface-2);color:var(--text);font-size:19px;
+    background:var(--surface-2);color:var(--text);font-size:19px;border:1px solid var(--hairline);
     display:grid;place-items:center;cursor:pointer;transition:.15s;
   }
   .iconbtn:active{transform:scale(.92);background:var(--surface-3);}
   .topbar .accentbtn{width:auto;padding:0 14px;font-size:14px;font-weight:700;}
 
   /* ---------- Layout ---------- */
-  .screen{padding:6px 14px calc(var(--nav-h) + var(--safe-bottom) + 24px);
+  .screen{padding:8px 14px calc(var(--nav-h) + var(--safe-bottom) + 28px);
     animation:fade .22s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   #app.no-anim .screen{animation:none;}
-  .section-label{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  .section-label{font-size:11px;font-weight:800;letter-spacing:1.35px;text-transform:uppercase;
     color:var(--faint);margin:22px 4px 10px;}
   .muted{color:var(--muted);}
 
   /* ---------- Cards ---------- */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:16px;margin-bottom:12px;}
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);
+    padding:16px;margin-bottom:12px;box-shadow:var(--shadow-soft);}
   .card.tappable{cursor:pointer;transition:.15s;}
   .card.tappable:active{transform:scale(.985);background:var(--surface-2);}
 
   /* ---------- Buttons ---------- */
   .btn{
     display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-    padding:15px 18px;border:none;border-radius:14px;font-size:16px;font-weight:700;
+    min-height:48px;padding:14px 18px;border:1px solid transparent;border-radius:14px;font-size:15px;font-weight:750;
     cursor:pointer;transition:.15s;background:var(--surface-2);color:var(--text);
   }
   .btn:active{transform:scale(.98);}
-  .btn.primary{background:var(--accent);color:#1a0e08;box-shadow:0 6px 18px rgba(255,106,61,.3);}
+  .btn.primary{background:linear-gradient(180deg,#e09a67,var(--accent));color:#21130b;box-shadow:0 8px 22px rgba(217,138,85,.22);}
   .btn.good{background:var(--good);color:#06150c;}
-  .btn.ghost{background:var(--surface-2);}
+  .btn.ghost{background:var(--surface-2);border-color:var(--hairline);}
   .btn.danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
   .btn.sm{padding:10px 14px;font-size:14px;width:auto;border-radius:11px;}
   .btn-row{display:flex;gap:10px;}
   .btn-row .btn{flex:1;}
 
   /* ---------- Hero / dashboard ---------- */
-  .hero{background:linear-gradient(135deg,#1b2230,#14181f);border:1px solid var(--border);
+  .hero{background:linear-gradient(145deg,#1b2027,#101419);border:1px solid var(--hairline);
     border-radius:var(--radius);padding:18px;margin-bottom:14px;position:relative;overflow:hidden;}
   .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
     background:radial-gradient(circle,var(--accent-dim),transparent 70%);}
-  .hero h2{margin:0 0 2px;font-size:22px;font-weight:800;}
+  .hero h2{margin:0 0 2px;font-size:25px;font-weight:850;letter-spacing:-.5px;}
   .hero p{margin:0;color:var(--muted);font-size:14px;}
   .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  .stat{background:rgba(18,22,27,.74);border:1px solid var(--hairline);border-radius:var(--radius-sm);
     padding:13px 12px;text-align:center;}
-  .stat .num{font-size:23px;font-weight:800;color:var(--accent);line-height:1;}
+  .stat .num{font-size:23px;font-weight:850;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.4px;}
   .stat .lbl{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.4px;text-transform:uppercase;}
 
   /* ---------- Today's plan ---------- */
-  .plan-card{background:linear-gradient(135deg,#1c2433,#14181f);border:1px solid var(--border);
-    border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .plan-card{background:linear-gradient(145deg,#1d2024,#111419 62%);border:1px solid rgba(217,138,85,.30);
+    border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 18px 48px rgba(0,0,0,.30);position:relative;overflow:hidden;}
+  .plan-card::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,var(--accent),rgba(217,138,85,0));}
   .plan-top{display:flex;align-items:center;margin-bottom:12px;}
   .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px;}
   .week-strip .day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;
@@ -109,7 +116,7 @@
   .week-strip .day.deferred-day .db{color:var(--accent-2);}
   .week-strip .day.moved .db{text-decoration:line-through;opacity:.5;}
   .plan-day{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);}
-  .plan-title{font-size:18px;font-weight:800;margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+  .plan-title{font-size:23px;font-weight:850;letter-spacing:-.55px;margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;line-height:1.15;}
   .plan-next{font-size:13px;color:var(--muted);margin-top:8px;}
   .plan-next b{color:var(--accent-2);}
   .deferred-chip{font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
@@ -133,7 +140,7 @@
   .row .grow{flex:1;min-width:0;}
   .row .title{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .row .sub{font-size:13px;color:var(--muted);margin-top:2px;}
-  .chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:750;padding:4px 9px;border-radius:99px;
     background:var(--surface-2);color:var(--muted);}
   .chip.accent{background:var(--accent-dim);color:var(--accent-2);}
   .pill{font-size:12px;color:var(--faint);}
@@ -163,17 +170,17 @@
   .ex-steps li{margin-bottom:5px;}
   .ex-cues{margin:2px 0 0 20px;padding:0;font-size:13.5px;line-height:1.55;color:var(--muted);}
   .ex-cues li{margin-bottom:5px;}
-  .exercise{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:14px;margin-bottom:12px;}
+  .exercise{background:linear-gradient(180deg,var(--surface),#0f1317);border:1px solid var(--hairline);border-radius:20px;
+    padding:14px;margin-bottom:14px;box-shadow:var(--shadow-soft);}
   .exercise-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .exercise-head .name{font-weight:800;font-size:16px;flex:1;color:var(--accent-2);}
+  .exercise-head .name{font-weight:850;font-size:18px;letter-spacing:-.25px;flex:1;color:var(--text);}
   .set-table{width:100%;}
   .set-hd,.set-rw{display:grid;grid-template-columns:34px 1fr 64px 64px 44px;gap:8px;align-items:center;}
   .set-hd{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;
     padding:0 2px 8px;font-weight:700;}
   .set-rw{padding:5px 0;}
   .set-rw.done{opacity:.96;}
-  .set-rw.done .setnum{background:var(--good);color:#06150c;}
+  .set-rw.done .setnum{background:var(--accent);color:#21130b;}
   .setnum{width:30px;height:30px;border-radius:9px;background:var(--surface-3);display:grid;
     place-items:center;font-weight:800;font-size:13px;}
   .prev{font-size:12px;color:var(--faint);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -185,7 +192,7 @@
   input.cell:focus{outline:none;border-color:var(--accent);background:var(--surface-3);}
   .checkbtn{width:42px;height:42px;border-radius:10px;border:1px solid var(--border);
     background:var(--surface-2);color:var(--faint);font-size:18px;display:grid;place-items:center;cursor:pointer;transition:.12s;}
-  .checkbtn.on{background:var(--good);color:#06150c;border-color:var(--good);}
+  .checkbtn.on{background:var(--accent);color:#21130b;border-color:var(--accent);}
   .checkbtn:active{transform:scale(.9);}
   .addset{margin-top:8px;background:var(--surface-2);color:var(--accent-2);font-weight:700;}
 
@@ -206,12 +213,12 @@
   /* ---------- Bottom nav ---------- */
   .nav{position:fixed;bottom:0;left:0;right:0;z-index:40;
     height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);
-    background:rgba(16,20,27,.92);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+    background:rgba(13,16,20,.94);backdrop-filter:blur(20px);border-top:1px solid var(--hairline);
     display:flex;max-width:560px;margin:0 auto;}
   .nav button{flex:1;border:none;background:none;color:var(--faint);font-size:10.5px;font-weight:700;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
     letter-spacing:.3px;transition:.15s;}
-  .nav button .ic{font-size:21px;line-height:1;}
+  .nav button .ic{width:23px;height:23px;display:grid;place-items:center;line-height:1;}
   .nav button.active{color:var(--accent);}
 
   /* ---------- FAB ---------- */
@@ -236,8 +243,8 @@
   /* ---------- Modal sheet ---------- */
   .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;
     align-items:flex-end;justify-content:center;animation:fade .2s;}
-  .sheet{background:var(--surface);width:100%;max-width:560px;border-radius:22px 22px 0 0;
-    border:1px solid var(--border);max-height:88vh;display:flex;flex-direction:column;
+  .sheet{background:linear-gradient(180deg,#171b21,var(--surface));width:100%;max-width:560px;border-radius:24px 24px 0 0;
+    border:1px solid var(--hairline);max-height:88vh;display:flex;flex-direction:column;
     animation:slideup .26s cubic-bezier(.2,.9,.3,1);padding-bottom:var(--safe-bottom);}
   @keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
   .sheet-head{padding:16px 16px 10px;display:flex;align-items:center;gap:10px;}
@@ -265,8 +272,8 @@
   .record-row:last-child{border-bottom:none;}
 
   /* ---------- Charts ---------- */
-  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:16px;margin-bottom:12px;}
+  .chart-card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);
+    padding:17px;margin-bottom:14px;box-shadow:var(--shadow-soft);}
   .chart-card h4{margin:0 0 2px;font-size:15px;font-weight:800;}
   .chart-card .csub{font-size:12px;color:var(--muted);margin-bottom:12px;}
   svg.chart{width:100%;display:block;overflow:visible;}
@@ -289,6 +296,29 @@
   .hr{height:1px;background:var(--border);margin:14px 0;border:none;}
   .right{margin-left:auto;}
   a.link{color:var(--accent-2);text-decoration:none;font-weight:600;}
+
+  /* ---------- Forge Industrial components ---------- */
+  .brand-title{display:flex;align-items:center;gap:9px;letter-spacing:2.4px;text-transform:uppercase;font-size:16px;font-weight:900;}
+  .brand-mark{width:24px;height:24px;border:1px solid rgba(217,138,85,.55);border-radius:8px;display:grid;place-items:center;color:var(--accent);background:var(--accent-dim);}
+  .brand-mark .icon{width:15px;height:15px;}
+  .page-kicker{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent-2);font-weight:800;margin-bottom:5px;}
+  .page-intro{margin:3px 2px 16px}.page-intro h2{font-size:27px;line-height:1.08;letter-spacing:-.7px;margin:0 0 6px}.page-intro p{margin:0;color:var(--muted);font-size:13px;}
+  .home-greeting{padding:5px 2px 15px}.home-greeting h2{font-size:28px;line-height:1.08;letter-spacing:-.8px;margin:0 0 5px}.home-greeting p{font-size:13px;color:var(--muted);margin:0;}
+  .setup-compact{width:auto;min-height:36px;padding:8px 11px;border-radius:11px;background:rgba(217,138,85,.10);border:1px solid rgba(217,138,85,.28);color:var(--accent-2);font-size:12px;font-weight:800;display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}.quick-grid .btn:last-child{grid-column:1/-1}.quick-grid .btn{justify-content:flex-start;text-align:left;padding:12px 14px;font-size:13px;}
+  .routine-card{padding:0;overflow:hidden}.routine-main{padding:16px;cursor:pointer}.routine-name{font-size:18px;font-weight:850;letter-spacing:-.25px;line-height:1.2}.routine-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:12px}.routine-meta span{display:inline-flex;align-items:center;gap:4px}.routine-meta .icon{width:15px;height:15px}.muscle-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:11px}.muscle-chips .chip{background:rgba(255,255,255,.045);color:#c7c0b7}.routine-actions{padding:11px 14px 14px;border-top:1px solid var(--hairline);display:flex;gap:9px}.routine-details{padding:0 14px 10px}.routine-details .row{border-top:1px solid var(--hairline)!important;}
+  .catalog-summary{font-size:12px;color:var(--muted);margin:2px 3px 10px}.catalog-group{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-soft)}
+  .catalog-row{display:flex;align-items:center;gap:11px;padding:12px;border-bottom:1px solid var(--hairline);min-height:62px}.catalog-row:last-child{border-bottom:none}.catalog-row .title{font-weight:800}.catalog-row .sub{font-size:12px;color:var(--muted);margin-top:3px}.catalog-equip{width:34px;height:34px;border-radius:10px;background:var(--surface-2);color:var(--accent-2);display:grid;place-items:center;flex:0 0 auto}.catalog-equip .icon{width:18px;height:18px}
+  .session-strip{display:flex;align-items:center;gap:12px;padding:11px 13px;margin-bottom:12px;background:rgba(255,255,255,.025);border:1px solid var(--hairline);border-radius:14px}.session-strip .session-main{flex:1}.session-strip .session-date{font-size:12px;color:var(--muted);margin-top:2px}.session-strip button{min-height:36px}
+  .workout-progress{margin:0 1px 16px}.workout-progress .top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}.workout-progress .track{height:4px;background:var(--surface-3);border-radius:99px;overflow:hidden}.workout-progress .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px;transition:width .25s}
+  .ex-toolbar{display:flex;gap:6px;margin:0 0 10px;overflow-x:auto;scrollbar-width:none}.ex-toolbar::-webkit-scrollbar{display:none}.toolbtn{min-height:34px;padding:7px 9px;border:1px solid var(--hairline);background:var(--surface-2);color:var(--muted);border-radius:10px;font-size:11px;font-weight:750;white-space:nowrap;display:flex;align-items:center;gap:5px;cursor:pointer}.toolbtn .icon{width:14px;height:14px}.toolbtn:active{color:var(--accent-2)}
+  .progress-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:18px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-soft)}.progress-metric{background:linear-gradient(160deg,#171c22,var(--surface));padding:15px 10px}.progress-metric .value{font-size:21px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.5px}.progress-metric .label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.75px;margin-top:4px}.progress-metric.primary .value{color:var(--accent-2)}
+  .record-value{font-size:18px;font-weight:900;color:var(--accent-2);font-variant-numeric:tabular-nums}.record-row{transition:background .15s}.record-row:active{background:rgba(217,138,85,.06)}
+  .chart-label{font-size:10px;fill:var(--muted);font-weight:700}.chart-direct{font-size:11px;fill:var(--accent-2);font-weight:850}
+  :focus-visible{outline:2px solid var(--accent-2)!important;outline-offset:2px}
+  .iconbtn,.infobtn,.checkbtn,.eqchip,.nav button{min-width:42px;min-height:42px}
+  @media(max-width:380px){.set-hd,.set-rw{grid-template-columns:31px 1fr 58px 58px 42px;gap:5px}.plan-title{font-size:21px}.quick-grid{grid-template-columns:1fr}.quick-grid .btn:last-child{grid-column:auto}.progress-metric{padding:13px 7px}.progress-metric .value{font-size:18px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -309,17 +339,32 @@ const DB = {
 };
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
+/* Stable exercise identity. Display names can change; keys keep routines and history joined. */
+const EXERCISE_ALIASES={
+  "Incline Dumbbell Press":"Incline DB Press",
+  "Dumbbell Shoulder Press":"DB Overhead Press",
+  "Lateral Raise":"DB Lateral Raise",
+  "Dumbbell Curl":"DB Bicep Curl",
+};
+function canonicalExerciseName(name){
+  let n=String(name||"").trim(), seen=new Set();
+  while(EXERCISE_ALIASES[n]&&!seen.has(n)){ seen.add(n); n=EXERCISE_ALIASES[n]; }
+  return n;
+}
+function exerciseSlug(name){ return canonicalExerciseName(name).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+function canonicalExerciseKey(name){ return "ex:"+exerciseSlug(name); }
+
 /* ---------- Default exercise library ---------- */
 const DEFAULT_EXERCISES = [
-  ["Barbell Bench Press","Chest"],["Incline Dumbbell Press","Chest"],["Push-Up","Chest"],
+  ["Barbell Bench Press","Chest"],["Push-Up","Chest"],
   ["Cable Fly","Chest"],["Dip","Chest"],
   ["Back Squat","Legs"],["Front Squat","Legs"],["Leg Press","Legs"],["Romanian Deadlift","Legs"],
   ["Leg Extension","Legs"],["Leg Curl","Legs"],["Walking Lunge","Legs"],["Calf Raise","Legs"],
   ["Deadlift","Back"],["Pull-Up","Back"],["Lat Pulldown","Back"],["Barbell Row","Back"],
   ["Seated Cable Row","Back"],["Face Pull","Back"],
-  ["Overhead Press","Shoulders"],["Dumbbell Shoulder Press","Shoulders"],["Lateral Raise","Shoulders"],
+  ["Overhead Press","Shoulders"],["DB Overhead Press","Shoulders"],["DB Lateral Raise","Shoulders"],
   ["Rear Delt Fly","Shoulders"],
-  ["Barbell Curl","Arms"],["Dumbbell Curl","Arms"],["Hammer Curl","Arms"],
+  ["Barbell Curl","Arms"],["DB Bicep Curl","Arms"],["Hammer Curl","Arms"],
   ["Tricep Pushdown","Arms"],["Skullcrusher","Arms"],["Close-Grip Bench Press","Arms"],
   ["Plank","Core"],["Hanging Leg Raise","Core"],["Cable Crunch","Core"],["Russian Twist","Core"],
   ["Treadmill Run","Cardio"],["Rowing Machine","Cardio"],["Cycling","Cardio"],
@@ -333,7 +378,7 @@ const DEFAULT_EXERCISES = [
   ["90/90 Hip Stretch","Mobility"],
   // --- Bodyweight (no equipment) ---
   ["Superman","Back"],
-].map(([name,muscle])=>({id:uid()+name.length, name, muscle, custom:false}));
+].map(([name,muscle])=>({id:canonicalExerciseKey(name), key:canonicalExerciseKey(name), name, muscle, custom:false}));
 
 /* ---------- Preset program: 3-Day At-Home Full Body (His Mass / Hers Tone) ---------- */
 const PROGRAM = [
@@ -405,7 +450,7 @@ function buildPresets(){
       id:"preset-"+day.key+"-"+k, preset:true,
       name:`Workout ${day.key} — ${day.title} (${label})`,
       note:(day.warmup?day.warmup+"  ":"")+tip,
-      exercises: day.ex.map(e=>({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note})),
+      exercises: day.ex.map(e=>attachExerciseRef({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note},e.name)),
     });
   }));
   return out;
@@ -416,6 +461,10 @@ function buildPresets(){
 const MOVEMENT_POOLS = {
   squat:        {label:"Squat (knee-dominant)", muscle:"Legs",
                  list:["DB Goblet Squat","DB Front Squat","DB Sumo Squat","Heels-Elevated Goblet Squat","DB Box Squat","Bodyweight Squat","Tempo Goblet Squat","Back Squat","Front Squat"]},
+  knee_extension:{label:"Knee extension / machine press", muscle:"Legs",
+                 list:["Leg Press","Leg Extension"]},
+  knee_flexion: {label:"Knee flexion (hamstrings)", muscle:"Legs",
+                 list:["Leg Curl"]},
   lunge:        {label:"Lunge / split squat (single-leg)", muscle:"Legs",
                  list:["Bulgarian Split Squat","DB Reverse Lunge","DB Forward Lunge","Walking Lunge","DB Step-Up","DB Split Squat","Curtsy Lunge","Reverse Lunge","Barbell Reverse Lunge"]},
   hinge:        {label:"Hip hinge (posterior chain)", muscle:"Legs",
@@ -423,34 +472,120 @@ const MOVEMENT_POOLS = {
   bridge:       {label:"Glute bridge / hip thrust", muscle:"Legs",
                  list:["Weighted Glute Bridge","DB Hip Thrust","Single-Leg Glute Bridge","Frog Pump","B-Stance Hip Thrust","Barbell Hip Thrust"]},
   press_flat:   {label:"Horizontal press (flat)", muscle:"Chest",
-                 list:["Flat DB Bench Press","Push-Up","DB Floor Press","Weighted Push-Up","Close-Grip DB Press","Wide-Grip Push-Up","Barbell Bench Press","Close-Grip Bench Press"]},
+                 list:["Flat DB Bench Press","Push-Up","DB Floor Press","Weighted Push-Up","Close-Grip DB Press","Wide-Grip Push-Up","Barbell Bench Press","Close-Grip Bench Press","Dip"]},
   press_incline:{label:"Incline press (upper chest)", muscle:"Chest",
                  list:["Incline DB Press","Low-Incline DB Press","Incline DB Squeeze Press","Feet-Elevated Push-Up","Incline Hex Press","Barbell Incline Press"]},
   fly:          {label:"Chest fly (adduction)", muscle:"Chest",
-                 list:["DB Bench Fly","Incline DB Fly","Floor DB Fly","Plate Svend Press"]},
+                 list:["DB Bench Fly","Incline DB Fly","Floor DB Fly","Plate Svend Press","Cable Fly"]},
   row:          {label:"Horizontal pull / row", muscle:"Back",
-                 list:["One-Arm DB Row","Chest Supported Row","DB Renegade Row","DB Bent-Over Row","Inverted Row","Seal Row","Gorilla Row","Barbell Row","Pendlay Row"]},
+                 list:["One-Arm DB Row","Chest Supported Row","DB Renegade Row","DB Bent-Over Row","Inverted Row","Seal Row","Gorilla Row","Barbell Row","Pendlay Row","Seated Cable Row"]},
   pull_vert:    {label:"Vertical pull (lats)", muscle:"Back",
-                 list:["Pull-Up","Chin-Up","Lat Pulldown"]},
+                 list:["Pull-Up","Chin-Up","Assisted Pull-Up","Eccentric Pull-Up","Lat Pulldown"]},
+  pullup_skill: {label:"Pull-up skill / active hang", muscle:"Back",
+                 list:["Dead Hang","Scapular Pull-Up"]},
+  scapular:     {label:"Scapular control / rear delts", muscle:"Shoulders",
+                 list:["Rear Delt Fly","Chest-Supported Rear-Delt Row","Prone Y-T-W Raise","Scapular Push-Up","Face Pull","Superman"]},
   press_oh:     {label:"Overhead press (vertical)", muscle:"Shoulders",
                  list:["DB Overhead Press","Seated DB Shoulder Press","DB Push Press","Arnold Press","Single-Arm DB Press","Pike Push-Up","Overhead Press","Barbell Push Press"]},
   lateral:      {label:"Lateral / delt raise", muscle:"Shoulders",
-                 list:["DB Lateral Raise","DB Front Raise","Leaning Lateral Raise","Rear Delt Fly","Seated Lateral Raise","6-Way Shoulder Raise"]},
+                 list:["DB Lateral Raise","DB Front Raise","Leaning Lateral Raise","Seated Lateral Raise","6-Way Shoulder Raise"]},
   shrug:        {label:"Shrug / traps", muscle:"Back",
                  list:["DB Shrug","Incline DB Shrug","DB Upright Row","DB High Pull","Farmer-Hold Shrug","Barbell Shrug"]},
   curl:         {label:"Biceps curl", muscle:"Arms",
                  list:["DB Bicep Curl","Hammer Curl","Incline DB Curl","Concentration Curl","Cross-Body Hammer Curl","Zottman Curl","Spider Curl","Barbell Curl"]},
   triceps:      {label:"Triceps extension", muscle:"Arms",
-                 list:["Overhead DB Tricep Extension","DB Skullcrusher","DB Kickback","Close-Grip Push-Up","Bench Dip","DB Tate Press","Skullcrusher"]},
+                 list:["Overhead DB Tricep Extension","DB Skullcrusher","DB Kickback","Close-Grip Push-Up","Bench Dip","DB Tate Press","Skullcrusher","Tricep Pushdown"]},
+  calf:         {label:"Calves / lower leg", muscle:"Legs",
+                 list:["Calf Raise","Standing Barbell Calf Raise","Single-Leg DB Calf Raise","Tibialis Raise"]},
+  carry:        {label:"Loaded carry / grip", muscle:"Core",
+                 list:["Farmer Carry","Suitcase Carry","Front-Rack Carry","Barbell Static Hold"]},
   core_rot:     {label:"Core — rotation / anti-rotation", muscle:"Core",
-                 list:["DB Anchored Russian Twist","DB Plank Pull-Through","DB Wood Chop","Side Plank Reach-Through","Bicycle Crunch","DB Standing Twist"]},
+                 list:["DB Anchored Russian Twist","Russian Twist","DB Plank Pull-Through","DB Wood Chop","Side Plank Reach-Through","Bicycle Crunch","DB Standing Twist"]},
   core_stab:    {label:"Core — anti-extension / lower abs", muscle:"Core",
                  list:["DB 90-Degree Heel Tap","Dead Bug","Hollow Body Hold","Reverse Crunch","Lying Leg Raise","Plank","Mountain Climbers","Barbell Rollout"]},
+  core_flexion: {label:"Core — trunk / hip flexion", muscle:"Core",
+                 list:["Hanging Knee Raise","Hanging Leg Raise","Cable Crunch"]},
+  core_lateral: {label:"Core — lateral stability", muscle:"Core",
+                 list:["Side Plank"]},
+  cardio:       {label:"Conditioning / cardio", muscle:"Cardio",
+                 list:["Treadmill Run","Rowing Machine","Cycling"]},
+  mobility:     {label:"Mobility", muscle:"Mobility",
+                 list:["90/90 Hip Stretch"]},
 };
-function exPattern(name){ const e=state.exercises.find(x=>x.name===name); return e&&e.pattern; }
+const PATTERN_META={
+  squat:{secondary:["Glutes","Core"],feel:"Quads and glutes working while the whole foot stays planted."},
+  knee_extension:{secondary:["Glutes"],feel:"Quads working through a controlled knee bend and extension."},
+  knee_flexion:{secondary:["Calves"],feel:"Hamstrings shortening behind the thigh without the hips lifting."},
+  lunge:{secondary:["Glutes","Core"],feel:"Front-leg quads and glutes with the pelvis staying level."},
+  hinge:{secondary:["Hamstrings","Glutes","Core"],feel:"Hamstrings lengthening on the way down and glutes driving the return."},
+  bridge:{secondary:["Hamstrings","Core"],feel:"Glutes producing the lockout without pressure in the lower back."},
+  press_flat:{secondary:["Triceps","Front delts"],feel:"Chest and triceps pressing while the shoulder blades stay supported."},
+  press_incline:{secondary:["Triceps","Front delts"],feel:"Upper chest and triceps pressing without the shoulders rolling forward."},
+  fly:{secondary:["Front delts"],feel:"Chest stretching and then squeezing the arms back together."},
+  row:{secondary:["Biceps","Rear delts"],feel:"Upper back and lats pulling the elbow toward the body."},
+  pull_vert:{secondary:["Biceps","Upper back"],feel:"Lats drawing the elbows down while the shoulders stay away from the ears."},
+  pullup_skill:{secondary:["Grip","Core"],feel:"Shoulder blades and grip supporting a controlled active hang."},
+  scapular:{secondary:["Upper back","Rotator cuff"],feel:"Rear shoulders and muscles around the shoulder blades moving with control."},
+  press_oh:{secondary:["Triceps","Core"],feel:"Shoulders and triceps pressing while the ribs stay stacked over the pelvis."},
+  lateral:{secondary:["Upper traps"],feel:"Side or rear delts lifting the arms without torso momentum."},
+  shrug:{secondary:["Grip"],feel:"Upper traps elevating the shoulders straight up and down."},
+  curl:{secondary:["Forearms"],feel:"Biceps and forearms moving the load while the upper arm stays quiet."},
+  triceps:{secondary:["Chest","Shoulders"],feel:"Triceps straightening the elbow without shoulder movement."},
+  calf:{secondary:["Feet","Lower leg"],feel:"Calves shortening at the top and stretching fully at the bottom."},
+  carry:{secondary:["Grip","Upper back","Obliques"],feel:"Grip and trunk resisting sway while you walk tall."},
+  core_rot:{secondary:["Obliques"],feel:"The trunk controlling rotation without the lower back taking over."},
+  core_stab:{secondary:["Hip flexors"],feel:"Deep abdominal tension keeping the ribs and pelvis connected."},
+  core_flexion:{secondary:["Hip flexors"],feel:"Lower abs curling the pelvis rather than swinging the legs."},
+  core_lateral:{secondary:["Glutes","Shoulders"],feel:"Side abs and glutes holding the body in one straight line."},
+  cardio:{secondary:["Heart and lungs"],feel:"A sustainable whole-body effort at the intended pace."},
+  mobility:{secondary:[],feel:"A controlled stretch without pinching or sharp pain."},
+};
+const EXERCISE_META_OVERRIDES={
+  "Back Squat":{difficulty:"intermediate",requirements:["Rack","Barbell","Plates","Safety arms"],safety:"Set the safeties just below your deepest controlled position and use collars."},
+  "Front Squat":{difficulty:"intermediate",requirements:["Rack","Barbell","Plates","Safety arms"],safety:"Set safeties below the bottom position and keep the rack area clear before unracking."},
+  "Barbell Bench Press":{difficulty:"intermediate",requirements:["Rack","Bench","Barbell","Plates","Safety arms"],safety:"Set the safeties just below chest height and use a spotter for near-limit sets."},
+  "Barbell Incline Press":{difficulty:"intermediate",requirements:["Rack","Incline bench","Barbell","Plates","Safety arms"],safety:"Confirm the bench is centered and the safeties sit just below the bottom bar position."},
+  "Deadlift":{difficulty:"intermediate",requirements:["Barbell","Plates","Open floor"],safety:"Clear the floor, use collars, and reset your brace before every rep."},
+  "Pull-Up":{difficulty:"intermediate",requirements:["Pull-up bar"],regressions:["Assisted Pull-Up","Eccentric Pull-Up"],progressions:["Add a pause at the top","Add load only after strict reps are repeatable"]},
+  "Assisted Pull-Up":{difficulty:"beginner",requirements:["Pull-up bar","Stable foot support or assistance"],progressions:["Eccentric Pull-Up","Pull-Up"]},
+  "Eccentric Pull-Up":{difficulty:"beginner",requirements:["Pull-up bar","Stable step or bench"],regressions:["Assisted Pull-Up"],progressions:["Pull-Up"]},
+  "Dead Hang":{difficulty:"beginner",requirements:["Pull-up bar"],safety:"Use a securely mounted bar and step down if your grip begins to open."},
+  "Scapular Pull-Up":{difficulty:"beginner",requirements:["Pull-up bar"],regressions:["Dead Hang"],progressions:["Assisted Pull-Up","Pull-Up"]},
+  "Farmer Carry":{difficulty:"beginner",requirements:["Dumbbells","Clear walking lane"],safety:"Clear the walking path and set the weights down under control before grip fails."},
+  "Suitcase Carry":{difficulty:"beginner",requirements:["Dumbbell","Clear walking lane"],safety:"Keep the walking path clear; stop if you cannot resist leaning toward the weight."},
+  "Front-Rack Carry":{difficulty:"intermediate",requirements:["Rack","Barbell","Plates","Clear walking lane"],safety:"Use collars, take short controlled steps, and keep the rack return path clear."},
+  "Barbell Static Hold":{difficulty:"intermediate",requirements:["Rack","Barbell","Plates","Safety arms"],safety:"Set safety arms just below the hold position and never step away from the rack."},
+  "Standing Barbell Calf Raise":{difficulty:"intermediate",requirements:["Rack","Barbell","Plates","Safety arms"],safety:"Keep the bar inside the rack and set safeties just below shoulder height."},
+  "Prone Y-T-W Raise":{difficulty:"beginner",requirements:["Incline bench","Very light dumbbells (optional)"],safety:"Use bodyweight or very light loads; stop before the shoulders shrug or pinch."},
+};
+function inferredRequirements(name,equipment){
+  const r=[];
+  if(equipment==="barbell") r.push("Barbell","Plates");
+  if(equipment==="dumbbell") r.push("Dumbbells");
+  if(equipment==="pullup") r.push("Pull-up bar");
+  if(equipment==="gym") r.push("Gym equipment");
+  if(/Bench|Chest Supported|Chest-Supported|Seal Row|Hip Thrust|Skullcrusher|Tate Press|Spider Curl/.test(name)) r.push("Bench");
+  if(/Back Squat|Front Squat|Bench Press|Incline Press|Rack Pull|Barbell Reverse Lunge|Barbell Static Hold|Standing Barbell Calf Raise/.test(name)) r.push("Rack");
+  return [...new Set(r)];
+}
+function metadataFor(name,muscle,equipment,pattern){
+  const p=PATTERN_META[pattern]||{}, o=EXERCISE_META_OVERRIDES[name]||{};
+  const accessory=["lateral","scapular","curl","triceps","calf","core_rot","core_stab","core_flexion","core_lateral"].includes(pattern);
+  const conditioning=["carry","cardio"].includes(pattern);
+  const unilateral=pattern==="lunge"||/One-Arm|Single-Arm|Single-Leg|Suitcase|Side Plank/.test(name);
+  return {
+    key:canonicalExerciseKey(name), primaryMuscles:[muscle], secondaryMuscles:p.secondary||[],
+    difficulty:o.difficulty||((equipment==="barbell"&&["squat","hinge","press_flat","press_oh"].includes(pattern))?"intermediate":"beginner"),
+    unilateral, requirements:o.requirements||inferredRequirements(name,equipment),
+    restCategory:conditioning?"conditioning":accessory?"accessory":equipment==="barbell"?"strength":"standard",
+    feel:o.feel||p.feel||"Move through a controlled range without sharp pain.", safety:o.safety||"Use a controlled load and stop the set if position breaks down.",
+    regressions:o.regressions||[], progressions:o.progressions||[],
+  };
+}
+function exPattern(name){ const e=exerciseByRef(name); return e&&e.pattern; }
 function patternLabel(name){ const p=exPattern(name); return p&&MOVEMENT_POOLS[p]?MOVEMENT_POOLS[p].label:""; }
 function altsFor(name){ const p=exPattern(name); if(!p) return [];
-  return state.exercises.filter(e=>e.pattern===p && e.name!==name); }
+  return state.exercises.filter(e=>e.pattern===p && !sameExercise(e,name)); }
 
 /* ---------- Equipment tagging ---------- */
 const EQUIP_LABELS={barbell:"Barbell",dumbbell:"Dumbbells",bodyweight:"Bodyweight",pullup:"Pull-up bar",gym:"Gym"};
@@ -462,6 +597,7 @@ const EQUIP_EXPLICIT={
   "Rack Pull":"barbell","Pendlay Row":"barbell",
   // pull-up bar
   "Pull-Up":"pullup","Chin-Up":"pullup","Hanging Leg Raise":"pullup","Inverted Row":"pullup",
+  "Dead Hang":"pullup","Scapular Pull-Up":"pullup","Assisted Pull-Up":"pullup","Eccentric Pull-Up":"pullup","Hanging Knee Raise":"pullup",
   // dumbbell (names the prefix rules miss)
   "Hammer Curl":"dumbbell","Lateral Raise":"dumbbell","Rear Delt Fly":"dumbbell","Chest Supported Row":"dumbbell",
   "Weighted Glute Bridge":"dumbbell","Bulgarian Split Squat":"dumbbell","Walking Lunge":"dumbbell","Curtsy Lunge":"dumbbell",
@@ -469,6 +605,9 @@ const EQUIP_EXPLICIT={
   "Farmer-Hold Shrug":"dumbbell","Incline Hex Press":"dumbbell","Plate Svend Press":"dumbbell","Concentration Curl":"dumbbell",
   "Spider Curl":"dumbbell","Zottman Curl":"dumbbell","Cross-Body Hammer Curl":"dumbbell","Gorilla Row":"dumbbell",
   "Seal Row":"dumbbell","Calf Raise":"dumbbell",
+  "Farmer Carry":"dumbbell","Suitcase Carry":"dumbbell","Single-Leg DB Calf Raise":"dumbbell",
+  "Chest-Supported Rear-Delt Row":"dumbbell","Prone Y-T-W Raise":"dumbbell",
+  "Front-Rack Carry":"barbell","Barbell Static Hold":"barbell","Standing Barbell Calf Raise":"barbell",
   // bodyweight
   "Push-Up":"bodyweight","Wide-Grip Push-Up":"bodyweight","Close-Grip Push-Up":"bodyweight","Feet-Elevated Push-Up":"bodyweight",
   "Weighted Push-Up":"bodyweight","Pike Push-Up":"bodyweight","Bodyweight Squat":"bodyweight","Reverse Lunge":"bodyweight",
@@ -476,6 +615,7 @@ const EQUIP_EXPLICIT={
   "Superman":"bodyweight","Plank":"bodyweight","Mountain Climbers":"bodyweight","Dead Bug":"bodyweight","Hollow Body Hold":"bodyweight",
   "Reverse Crunch":"bodyweight","Lying Leg Raise":"bodyweight","Bicycle Crunch":"bodyweight","Side Plank Reach-Through":"bodyweight",
   "Russian Twist":"bodyweight","Bench Dip":"bodyweight","90/90 Hip Stretch":"bodyweight",
+  "Tibialis Raise":"bodyweight","Scapular Push-Up":"bodyweight","Side Plank":"bodyweight",
   // gym machines / cables / cardio
   "Cable Fly":"gym","Dip":"gym","Leg Press":"gym","Leg Extension":"gym","Leg Curl":"gym","Lat Pulldown":"gym",
   "Seated Cable Row":"gym","Face Pull":"gym","Tricep Pushdown":"gym","Cable Crunch":"gym",
@@ -486,6 +626,24 @@ function equipFor(name){
   if(/^Barbell/.test(name)) return "barbell";
   if(/(^|\s)DB\s|Dumbbell|Goblet/.test(name)) return "dumbbell";
   return null;   // custom / unknown → shows under "All" only
+}
+function exerciseByRef(ref){
+  if(!ref) return null;
+  const key=typeof ref==="string"&&ref.startsWith("ex:")?ref:(ref.exerciseKey||ref.key||canonicalExerciseKey(ref.name||ref));
+  const name=canonicalExerciseName(typeof ref==="string"?ref:(ref.name||""));
+  return state.exercises.find(e=>e.key===key)||state.exercises.find(e=>e.name===name)||null;
+}
+function exerciseKeyOf(ref){
+  if(!ref) return "";
+  if(typeof ref==="string") return ref.startsWith("ex:")?ref:canonicalExerciseKey(ref);
+  return ref.exerciseKey||ref.key||canonicalExerciseKey(ref.name||"");
+}
+function sameExercise(a,b){ return exerciseKeyOf(a)===exerciseKeyOf(b); }
+function attachExerciseRef(target,name){
+  const canonical=canonicalExerciseName(name||target.name);
+  const lib=typeof state!=="undefined"&&exerciseByRef(canonical);
+  target.name=canonical; target.exerciseKey=(lib&&lib.key)||canonicalExerciseKey(canonical);
+  return target;
 }
 
 /* ---------- Curated substitutions (first choices shown before the full pool) ---------- */
@@ -507,7 +665,7 @@ const SUBSTITUTIONS={
   "One-Arm DB Row":[["Barbell Row","Heavy bilateral row."],["Chest Supported Row","Less lower-back fatigue."],["Inverted Row","Pull-up-bar alternative."]],
   "Barbell Row":[["One-Arm DB Row","Bench-supported unilateral alternative."],["Pendlay Row","Dead-stop power-row option."],["Pull-Up","Vertical-pull alternative."]],
   "Chest Supported Row":[["One-Arm DB Row","More load and range freedom."],["Barbell Row","Heavy bilateral row."],["Pull-Up","Vertical-pull substitution."]],
-  "Pull-Up":[["Chin-Up","More biceps assistance."],["Inverted Row","Scalable bar-in-rack option."],["One-Arm DB Row","Dumbbell fallback."]],
+  "Pull-Up":[["Assisted Pull-Up","Keep the full motion with less effective bodyweight."],["Eccentric Pull-Up","Build strength through slow lowering."],["Inverted Row","Scalable rack-based pulling option."]],
   "Chin-Up":[["Pull-Up","More lat-focused grip."],["Inverted Row","Scalable rack alternative."],["One-Arm DB Row","Dumbbell fallback."]],
   "DB Overhead Press":[["Overhead Press","Barbell strength option."],["DB Push Press","Use leg drive to keep load moving."],["Pike Push-Up","Bodyweight fallback."]],
   "Overhead Press":[["DB Overhead Press","Use if the 45 lb bar is too heavy."],["Barbell Push Press","Leg-drive alternative."],["Pike Push-Up","Bodyweight fallback."]],
@@ -518,6 +676,12 @@ const SUBSTITUTIONS={
   "DB Anchored Russian Twist":[["DB Wood Chop","Standing diagonal rotation."],["DB Plank Pull-Through","Anti-rotation core work."],["Side Plank Reach-Through","Bodyweight rotational option."]],
   "DB Plank Pull-Through":[["DB Anchored Russian Twist","Seated rotation option."],["Dead Bug","Lower-back-friendly core stability."],["Plank","Simple no-load alternative."]],
   "Barbell Rollout":[["Hollow Body Hold","No-equipment anti-extension work."],["Plank","Simpler anti-extension option."],["Dead Bug","Most scalable core substitute."]],
+  "Assisted Pull-Up":[["Eccentric Pull-Up","More emphasis on lowering strength."],["Inverted Row","Fully scalable horizontal pull."],["Pull-Up","Progress when strict assisted reps are repeatable."]],
+  "Farmer Carry":[["Suitcase Carry","One-sided carry with more core demand."],["Barbell Static Hold","Rack-based grip option without walking."],["Farmer-Hold Shrug","Stationary dumbbell alternative."]],
+  "Suitcase Carry":[["Farmer Carry","Two-sided carry for heavier loading."],["Side Plank","No-equipment lateral-core alternative."],["DB Plank Pull-Through","Anti-rotation dumbbell alternative."]],
+  "Standing Barbell Calf Raise":[["Single-Leg DB Calf Raise","Unilateral dumbbell alternative."],["Calf Raise","Simple supported fallback."],["Tibialis Raise","Balances lower-leg work on the front of the shin."]],
+  "Chest-Supported Rear-Delt Row":[["Rear Delt Fly","Lighter rear-delt isolation."],["Prone Y-T-W Raise","Scapular-control alternative."],["Face Pull","Cable-based upper-back option."]],
+  "Side Plank":[["Suitcase Carry","Loaded moving alternative."],["Side Plank Reach-Through","Adds controlled rotation."],["Plank","Simpler bilateral stability option."]],
 };
 function modeAllowsEquipment(equipment,mode){
   if(mode==="db") return ["dumbbell","bodyweight","pullup"].includes(equipment);
@@ -526,13 +690,13 @@ function modeAllowsEquipment(equipment,mode){
 }
 function suggestedSubs(name,mode=equipMode()){
   return (SUBSTITUTIONS[name]||[]).map(([n,reason])=>{
-    const ex=state.exercises.find(x=>x.name===n); return ex&&{...ex,reason};
+    const ex=exerciseByRef(n); return ex&&{...ex,reason};
   }).filter(Boolean).filter(ex=>modeAllowsEquipment(ex.equipment,mode));
 }
 
 /* ---------- Barbell warm-up + plate planning ---------- */
 const DEFAULT_PLATE_PAIRS={45:1,35:1,25:1,10:1,5:2,2.5:2};
-function isBarbell(ex){ const lib=state.exercises.find(x=>x.name===ex.name); return (lib&&lib.equipment)==="barbell"; }
+function isBarbell(ex){ const lib=exerciseByRef(ex); return (lib&&lib.equipment)==="barbell"; }
 function configuredBarWeight(){ return U()==="kg" ? 20 : (Number(state.settings.barWeight)||45); }
 function platePairs(){ return {...DEFAULT_PLATE_PAIRS,...(state.settings.platePairs||{})}; }
 function suggestedWorkingWeight(ex){
@@ -586,6 +750,8 @@ const POOL_ANCHORS={
   shrug:        {db:"DB Shrug",               bb:"Barbell Shrug",        big:false},
   curl:         {db:"DB Bicep Curl",          bb:"Barbell Curl",         big:false},
   triceps:      {db:"Overhead DB Tricep Extension", bb:"Skullcrusher",   big:false},
+  calf:         {db:"Calf Raise",              bb:"Standing Barbell Calf Raise",big:false},
+  carry:        {db:"Farmer Carry",             bb:"Front-Rack Carry",   big:false},
 };
 /* name-level refinements; null = never map this movement (keeps its intent) */
 const BB_OVERRIDES={
@@ -600,7 +766,7 @@ const DB_OVERRIDES={
   "Rack Pull":"DB Romanian Deadlift","Barbell Rollout":null,
 };
 function mapExerciseForMode(name, mode){
-  const e=state.exercises.find(x=>x.name===name);
+  const e=exerciseByRef(name);
   if(!e) return name;
   if(!mode||mode==="db"){          // dumbbell mode: bring barbell movements down to DB equivalents
     if(e.equipment!=="barbell") return name;
@@ -620,11 +786,13 @@ function mapExerciseForMode(name, mode){
 }
 function targetForMappedExercise(target,source,mapped){
   let t=String(target||""); if(source===mapped) return t;
-  const arm=/One-Arm|Single-Arm/.test(mapped), leg=/Single-Leg/.test(mapped);
+  const arm=/One-Arm|Single-Arm/.test(mapped), leg=/Single-Leg/.test(mapped), side=/Suitcase|Side Plank/.test(mapped);
   if(!arm) t=t.replace(/\s*\/\s*arm\b/i,"");
   if(!leg&&!/Lunge|Split Squat|Step-Up/.test(mapped)) t=t.replace(/\s*\/\s*leg\b/i,"");
+  if(!side) t=t.replace(/\s*\/\s*side\b/i,"");
   if(arm&&!/\/\s*arm\b/i.test(t)) t+=" / arm";
   if(leg&&!/\/\s*leg\b/i.test(t)) t+=" / leg";
+  if(side&&!/\/\s*side\b/i.test(t)) t+=" / side";
   return t.trim();
 }
 function equipMode(){ return state.settings.equipMode||"db"; }
@@ -649,7 +817,7 @@ function buildBodyweightPresets(){
     id:"preset-BW-"+k, preset:true, bodyweight:true,
     name:`Bodyweight Full Body (${label})`,
     note:"🧳 No equipment needed — do it anywhere.  "+tip,
-    exercises: BW_PROGRAM.ex.map(e=>({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note})),
+    exercises: BW_PROGRAM.ex.map(e=>attachExerciseRef({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note},e.name)),
   }));
 }
 
@@ -684,26 +852,105 @@ function buildBarbellPresets(){
       id:"preset-"+day.key+"-"+k, preset:true, barbell:true,
       name:`${day.title} (${label})`,
       note:(day.warmup?day.warmup+"  ":"")+tip,
-      exercises: day.ex.map(e=>({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note})),
+      exercises: day.ex.map(e=>attachExerciseRef({name:e.name, muscle:e.muscle, sets:e[k][0], reps:e[k][1], note:e.note},e.name)),
     });
   }));
   return out;
 }
 
+/* ---------- Specialty workouts (4B — gap coverage) ---------- */
+const SPECIALTY_PROGRAM=[
+  {key:"SP-G",title:"G — Pull & Carry",equipment:"combo",ex:[
+    {name:"Pull-Up",muscle:"Back",his:[4,"4-8"],hers:[4,"3-6"],note:"Use Assisted Pull-Up or Eccentric Pull-Up to keep every rep controlled."},
+    {name:"Front Squat",muscle:"Legs",his:[3,"6-8"],hers:[3,"8-10"],note:"Use the rack safeties; equipment mode can map this to DB Front Squat."},
+    {name:"Incline DB Press",muscle:"Chest",his:[3,"8-10"],hers:[3,"10-12"],note:"Bench around 30°; lower under control and keep the shoulder blades set."},
+    {name:"Chest-Supported Rear-Delt Row",muscle:"Shoulders",his:[3,"10-12"],hers:[3,"12-15"],note:"Elbows wide, light load, chest stays on the bench."},
+    {name:"Suitcase Carry",muscle:"Core",his:[3,"40s / side"],hers:[3,"30s / side"],note:"Walk tall and resist leaning toward the DB."},
+    {name:"Hanging Knee Raise",muscle:"Core",his:[3,"8-12"],hers:[3,"6-10"],note:"Curl the pelvis up and reset all swinging between reps."},
+  ]},
+  {key:"SP-H",title:"H — Deadlift & Bench Strength",equipment:"barbell",ex:[
+    {name:"Deadlift",muscle:"Back",his:[3,"3-5"],hers:[3,"5"],note:"Reset from the floor and brace before every rep; stop with 1–2 clean reps in reserve."},
+    {name:"Barbell Bench Press",muscle:"Chest",his:[4,"5-8"],hers:[3,"6-8"],note:"Set safeties just below chest height and use collars."},
+    {name:"Pull-Up",muscle:"Back",his:[3,"4-8"],hers:[3,"3-6"],note:"Scale with assistance or controlled 3–5s eccentrics."},
+    {name:"Barbell Reverse Lunge",muscle:"Legs",his:[3,"8 / leg"],hers:[3,"8-10 / leg"],note:"Step back under control and drive through the front foot."},
+    {name:"Standing Barbell Calf Raise",muscle:"Legs",his:[3,"10-15"],hers:[3,"12-15"],note:"Stay inside the rack with safeties set; pause high and lower fully."},
+    {name:"Barbell Rollout",muscle:"Core",his:[3,"6-10"],hers:[3,"5-8"],note:"Use only the range that keeps the ribs and pelvis connected."},
+  ]},
+  {key:"SP-I",title:"I — Upper Back & Shoulder Quality",equipment:"combo",ex:[
+    {name:"Scapular Pull-Up",muscle:"Back",his:[3,"6-10"],hers:[3,"6-10"],note:"Straight elbows; move only through the shoulder blades."},
+    {name:"Chest-Supported Rear-Delt Row",muscle:"Shoulders",his:[3,"12-15"],hers:[3,"12-15"],note:"Use a light strict load with wide elbows."},
+    {name:"Prone Y-T-W Raise",muscle:"Shoulders",his:[2,"6 each"],hers:[2,"6 each"],note:"Bodyweight or very light DBs; no shrugging or lower-back extension."},
+    {name:"Single-Arm DB Press",muscle:"Shoulders",his:[3,"8 / arm"],hers:[3,"8-10 / arm"],note:"Stay tall against the offset load and finish each side before switching."},
+    {name:"Farmer Carry",muscle:"Core",his:[4,"40s"],hers:[4,"30s"],note:"Clear the lane, walk with short steps, and set the DBs down before grip fails."},
+    {name:"Side Plank",muscle:"Core",his:[3,"30-40s / side"],hers:[3,"20-30s / side"],note:"Stack the body in one line; bend the knees to scale."},
+  ]},
+];
+function buildSpecialtyPresets(){
+  const variants=[
+    ["his","His · Mass","Use the listed ranges and leave 1–2 clean reps in reserve."],
+    ["hers","Hers · Tone","Use the listed ranges with smooth reps and the same 1–2 rep reserve."],
+  ];
+  const out=[];
+  SPECIALTY_PROGRAM.forEach(day=>variants.forEach(([k,label,tip])=>out.push({
+    id:"preset-"+day.key+"-"+k,preset:true,specialty:true,barbell:day.equipment==="barbell",
+    name:`${day.title} (${label})`,note:`Specialty workout · ${tip}`,
+    exercises:day.ex.map(e=>attachExerciseRef({name:e.name,muscle:e.muscle,sets:e[k][0],reps:e[k][1],note:e.note},e.name)),
+  })));
+  return out;
+}
+
+function migrateExerciseData(){
+  const changed=new Set(), merged=[], byKey=new Map();
+  (state.exercises||[]).forEach(raw=>{
+    if(!raw||!raw.name) return;
+    const wasName=raw.name, isAlias=!!EXERCISE_ALIASES[wasName];
+    const name=isAlias?canonicalExerciseName(wasName):String(wasName).trim();
+    const custom=!!raw.custom&&!isAlias;
+    const key=custom?(raw.key||"custom:"+(raw.id||exerciseSlug(name))):canonicalExerciseKey(name);
+    const ex={...raw,name,key,id:raw.id||key,custom};
+    if(name!==wasName||raw.key!==key||raw.custom!==custom) changed.add("exercises");
+    const prior=byKey.get(key);
+    if(prior){
+      ["personalCue","desc"].forEach(k=>{ if(!prior[k]&&ex[k]) prior[k]=ex[k]; });
+      if(ex.favorite) prior.favorite=true;
+      changed.add("exercises");
+    } else { byKey.set(key,ex); merged.push(ex); }
+  });
+  state.exercises=merged;
+  const migrateRefs=(items,key)=>{
+    (items||[]).forEach(item=>{
+      if(!item||!item.name) return;
+      const name=canonicalExerciseName(item.name), lib=state.exercises.find(e=>e.name===name), exerciseKey=(lib&&lib.key)||canonicalExerciseKey(name);
+      if(item.name!==name||item.exerciseKey!==exerciseKey){ item.name=name; item.exerciseKey=exerciseKey; changed.add(key); }
+    });
+  };
+  (state.routines||[]).forEach(r=>migrateRefs(r.exercises,"routines"));
+  (state.workouts||[]).forEach(w=>migrateRefs(w.exercises,"workouts"));
+  if(state.active) migrateRefs(state.active.exercises,"active");
+  changed.forEach(k=>DB.set(k,state[k]));
+  return changed;
+}
+
 function seedData(){
+  const migrated=migrateExerciseData();
   // make sure every program exercise exists in the library (match by name)
-  let changed=false;
+  let changed=migrated.has("exercises");
   DEFAULT_EXERCISES.forEach(de=>{ if(!state.exercises.some(e=>e.name===de.name)){ state.exercises.push({...de}); changed=true; } });
   // ensure every movement-pool exercise exists AND is tagged with its pattern
   Object.entries(MOVEMENT_POOLS).forEach(([pat,pool])=>{
     pool.list.forEach(name=>{
       let ex=state.exercises.find(e=>e.name===name);
-      if(!ex){ ex={id:uid()+name.length, name, muscle:pool.muscle, custom:false}; state.exercises.push(ex); changed=true; }
+      if(!ex){ const key=canonicalExerciseKey(name); ex={id:key,key,name,muscle:pool.muscle,custom:false}; state.exercises.push(ex); changed=true; }
       if(ex.pattern!==pat){ ex.pattern=pat; changed=true; }
     });
   });
-  // tag every known exercise with its equipment (idempotent; customs stay untagged)
-  state.exercises.forEach(ex=>{ const q=equipFor(ex.name); if(q&&ex.equipment!==q){ ex.equipment=q; changed=true; } });
+  // tag every known exercise with stable identity, equipment, and structured metadata.
+  state.exercises.forEach(ex=>{
+    if(ex.custom){ if(!ex.key){ ex.key="custom:"+ex.id; changed=true; } return; }
+    const q=equipFor(ex.name), meta=metadataFor(ex.name,ex.muscle,q,ex.pattern);
+    if(q&&ex.equipment!==q){ ex.equipment=q; changed=true; }
+    Object.entries(meta).forEach(([k,v])=>{ if(JSON.stringify(ex[k])!==JSON.stringify(v)){ ex[k]=v; changed=true; } });
+  });
   if(changed) save("exercises");
   // seed the preset routines exactly once (user can edit/delete afterward)
   if(!DB.get("seed_v1", false)){
@@ -728,6 +975,12 @@ function seedData(){
     const ids=new Set(state.routines.map(r=>r.id));
     buildBarbellPresets().forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); });
     save("routines"); DB.set("seed_v3", true);
+  }
+  // seed the 4B specialty routines once; existing routine edits remain untouched.
+  if(!DB.get("seed_v4b", false)){
+    const ids=new Set(state.routines.map(r=>r.id));
+    buildSpecialtyPresets().forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); });
+    save("routines"); DB.set("seed_v4b", true);
   }
   // anchor the 2-week rotation so the week this feature arrived stays A/B/C
   if(!state.plan.cycleAnchor){
@@ -756,7 +1009,7 @@ function nextPlanDay(fromTs){
   return null;
 }
 function restorePresets(){ const ids=new Set(state.routines.map(r=>r.id));
-  buildPresets().concat(buildBodyweightPresets(), buildBarbellPresets()).forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); }); save("routines"); }
+  buildPresets().concat(buildBodyweightPresets(), buildBarbellPresets(), buildSpecialtyPresets()).forEach(p=>{ if(!ids.has(p.id)) state.routines.push(p); }); save("routines"); }
 function startBodyweight(){
   const variant=state.settings.planVariant||"his";
   let r=state.routines.find(x=>x.id==="preset-BW-"+variant);
@@ -826,20 +1079,24 @@ if(!state.settings.platePairs){ state.settings.platePairs={...DEFAULT_PLATE_PAIR
 if(!state.settings.barWeight){ state.settings.barWeight=45; save("settings"); }
 
 /* ---------- Cloud backup (sync to the home server) ---------- */
+const DATA_VERSION=2;
 const SYNC_KEYS = ["settings","exercises","routines","workouts","plan","bodyweights","deleted"];
 let _pushT=null, _syncing=false;
 function syncName(){ return (state.settings.syncName||"").trim(); }
 function localUpdated(){ return Number(localStorage.getItem("forge_updatedAt")||0); }
-function snapshot(){ const o={v:1, updated:localUpdated()||Date.now()}; SYNC_KEYS.forEach(k=>o[k]=state[k]); return o; }
+function snapshot(){ const o={v:DATA_VERSION, updated:localUpdated()||Date.now()}; SYNC_KEYS.forEach(k=>o[k]=state[k]); return o; }
 function applySnapshot(s){ SYNC_KEYS.forEach(k=>{ if(s[k]!==undefined){ state[k]=s[k]; DB.set(k,s[k]); } });
-  localStorage.setItem("forge_updatedAt", String(s.updated||Date.now())); render(); }
+  const received=JSON.stringify(SYNC_KEYS.map(k=>state[k]));
+  migrateExerciseData(); seedData();
+  const normalized=received!==JSON.stringify(SYNC_KEYS.map(k=>state[k]));
+  localStorage.setItem("forge_updatedAt", String(normalized?Math.max(Date.now(),(s.updated||0)+1):(s.updated||Date.now()))); render(); }
 function schedulePush(){ if(!syncName()) return; clearTimeout(_pushT); _pushT=setTimeout(syncNow,1500); }
 
 /* Merge two snapshots (b is the newer by .updated).
    Workouts/bodyweights are append-only records → union them so a stale device
    can never clobber history. Everything else is last-write-wins as before. */
 function mergeSnapshots(a,b){
-  const out={v:1};
+  const out={v:Math.max(DATA_VERSION,a.v||1,b.v||1)};
   SYNC_KEYS.forEach(k=>{ out[k] = b[k]!==undefined ? b[k] : a[k]; });   // LWW default
   // deletion tombstones: union, keep 90 days
   const tm={}; [...(a.deleted||[]),...(b.deleted||[])].forEach(t=>{ if(t&&t.id&&(!tm[t.id]||t.ts>tm[t.id].ts)) tm[t.id]=t; });
@@ -916,7 +1173,7 @@ async function notifyRestOver(){
 
 /* ---------- PR detection (best e1RM / weight from completed history) ---------- */
 function historicalBest(exName){ let e=0,w=0;
-  state.workouts.forEach(wk=>wk.exercises.filter(x=>x.name===exName).forEach(x=>x.sets.forEach(s=>{ e=Math.max(e,epley(s.weight,s.reps)); w=Math.max(w,Number(s.weight)||0); })));
+  state.workouts.forEach(wk=>wk.exercises.filter(x=>sameExercise(x,exName)).forEach(x=>x.sets.forEach(s=>{ e=Math.max(e,epley(s.weight,s.reps)); w=Math.max(w,Number(s.weight)||0); })));
   return {e,w}; }
 
 /* ---------- Navigation stack ---------- */
@@ -931,6 +1188,33 @@ function setTab(screen){ stack = [{screen}]; render(); }
 const $ = (sel,el=document)=>el.querySelector(sel);
 function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstChild; }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const ICONS={
+  forge:'<path d="M5 9h14M7 9V6h10v3M8 9l1 11h6l1-11M10 13h4"/>',
+  home:'<path d="M3 11 12 3l9 8M5 10v11h14V10M9 21v-7h6v7"/>',
+  history:'<path d="M3 12a9 9 0 1 0 3-6.7M3 4v6h6M12 7v5l3.5 2"/>',
+  progress:'<path d="M4 19V5M4 19h16M7 15l4-4 3 2 5-6"/>',
+  routines:'<path d="M8 4h8M9 3h6v3H9zM7 5H5v16h14V5h-2M8 11h8M8 15h8"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>',
+  play:'<path d="m9 7 8 5-8 5z"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  chevronLeft:'<path d="m15 18-6-6 6-6"/>', chevronDown:'<path d="m6 9 6 6 6-6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  dumbbell:'<path d="M6 9v6M3 10v4M18 9v6M21 10v4M6 12h12"/>',
+  body:'<circle cx="12" cy="5" r="2"/><path d="M7 10l5-2 5 2M12 8v6M8 21l4-7 4 7"/>',
+  equipment:'<path d="M4 8h16M6 5v6M18 5v6M8 14h8M9 14v5M15 14v5"/>',
+  swap:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
+  flame:'<path d="M12 22c4 0 7-3 7-7 0-5-4-7-5-12-3 2-5 5-4 8-2-1-3-3-3-3-2 2-3 4-3 7 0 4 3 7 8 7Z"/>',
+  scale:'<path d="M12 3v18M5 6h14M5 6l-3 7h6L5 6ZM19 6l-3 7h6l-3-7ZM8 21h8"/>',
+  edit:'<path d="m14 5 5 5M4 20l3.5-.7L19 7.8a2 2 0 0 0-2.8-2.8L4.7 16.5Z"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/>',
+  download:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>', upload:'<path d="M12 17V5M7 10l5-5 5 5M4 21h16"/>',
+  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0ZM8 6H4v2a4 4 0 0 0 4 4M16 6h4v2a4 4 0 0 1-4 4M12 13v5M8 21h8M9 18h6"/>',
+  check:'<path d="m5 12 4 4L19 6"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+  star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/>',
+  shuffle:'<path d="M4 7h3c5 0 5 10 10 10h3M17 14l3 3-3 3M4 17h3c2 0 3-1.5 4-3M15 7h5M17 4l3 3-3 3"/>',
+};
+function icon(name,cls=""){ return `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.info}</svg>`; }
 function fmtNum(n){ return Number.isInteger(n)?n:(Math.round(n*10)/10); }
 function setVolume(s){ return (Number(s.weight)||0)*(Number(s.reps)||0); }
 function workoutVolume(w){ let v=0; w.exercises.forEach(e=>e.sets.forEach(s=>{ if(s.done) v+=setVolume(s); })); return v; }
@@ -944,7 +1228,7 @@ function fmtDur(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600),m=M
   return (h?h+":":"")+String(m).padStart(h?2:1,"0")+":"+String(ss).padStart(2,"0"); }
 function relTime(ts){ const d=Math.floor((Date.now()-ts)/86400000); if(d<=0)return"Today"; if(d===1)return"Yesterday"; if(d<7)return d+" days ago"; return fmtDate(ts); }
 function exById(id){ return state.exercises.find(e=>e.id===id); }
-function personalCueFor(name){ const e=state.exercises.find(x=>x.name===name); return (e&&e.personalCue||"").trim(); }
+function personalCueFor(name){ const e=exerciseByRef(name); return (e&&e.personalCue||"").trim(); }
 function toast(msg){ const t=el(`<div class="toast">${esc(msg)}</div>`); document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity="0";t.style.transition=".3s";},1500); setTimeout(()=>t.remove(),1850); }
 function confirmAct(msg){ return window.confirm(msg); }
@@ -952,7 +1236,7 @@ function confirmAct(msg){ return window.confirm(msg); }
 /* find last performed set values for an exercise (for "prev" hints) */
 function lastPerformance(exName){
   for(const w of state.workouts){
-    const ex = w.exercises.find(e=>e.name===exName);
+    const ex = w.exercises.find(e=>sameExercise(e,exName));
     if(ex){ const done = ex.sets.filter(s=>s.done && (s.weight||s.reps)); if(done.length) return done; }
   }
   return null;
@@ -971,7 +1255,7 @@ function parseRepRange(target){
 }
 /* smaller jumps for isolation work; the barbell floors at 5 lb (2.5s load in pairs) */
 function progressIncrement(ex){
-  const lib=state.exercises.find(x=>x.name===ex.name);
+  const lib=exerciseByRef(ex);
   if(lib&&lib.equipment==="barbell") return U()==="kg" ? 2.5 : 5;
   const small=["Arms","Shoulders","Core"].includes(ex.muscle);
   return U()==="kg" ? (small?1.25:2.5) : (small?2.5:5);
@@ -1030,8 +1314,9 @@ function render(){
 function header(title, opts={}){
   const showBack = opts.back ?? (stack.length>1);
   const h = el(`<div class="topbar"></div>`);
-  if(showBack){ const b=el(`<button class="iconbtn" aria-label="Back">‹</button>`); b.style.fontSize="30px"; b.onclick=back; h.appendChild(b); }
-  h.appendChild(el(`<h1>${esc(title)}</h1>`));
+  if(showBack){ const b=el(`<button class="iconbtn" aria-label="Back">${icon("chevronLeft","lg")}</button>`); b.onclick=back; h.appendChild(b); }
+  if(title==="Forge") h.appendChild(el(`<h1 class="brand-title"><span class="brand-mark">${icon("forge")}</span><span>Forge</span></h1>`));
+  else h.appendChild(el(`<h1>${esc(title)}</h1>`));
   if(opts.right) h.appendChild(opts.right);
   return h;
 }
@@ -1041,14 +1326,14 @@ function renderNav(){
   const nav = document.getElementById("nav");
   const cur = peek().screen;
   const items = [
-    {s:"home",ic:"🏠",l:"Home"},{s:"history",ic:"📕",l:"History"},
-    {s:"progress",ic:"📈",l:"Progress"},{s:"routines",ic:"📋",l:"Routines"},
+    {s:"home",ic:"home",l:"Home"},{s:"history",ic:"history",l:"History"},
+    {s:"progress",ic:"progress",l:"Progress"},{s:"routines",ic:"routines",l:"Routines"},
   ];
   // active-tab detection (sub-screens map to their tab root)
   const rootOf = stack[0].screen;
   nav.innerHTML="";
   items.forEach(it=>{
-    const b = el(`<button class="${rootOf===it.s?"active":""}"><span class="ic">${it.ic}</span>${it.l}</button>`);
+    const b = el(`<button class="${rootOf===it.s?"active":""}" aria-label="${it.l}" ${rootOf===it.s?'aria-current="page"':""}><span class="ic">${icon(it.ic)}</span>${it.l}</button>`);
     b.onclick=()=>setTab(it.s); nav.appendChild(b);
   });
 }
@@ -1057,14 +1342,14 @@ function renderNav(){
    HOME / DASHBOARD
    ============================================================ */
 function renderHome(app){
-  app.appendChild(header("Forge 💪", {back:false, right:(()=>{const b=el(`<button class="iconbtn">⚙︎</button>`);b.onclick=()=>go("settings");return b;})()}));
+  app.appendChild(header("Forge", {back:false, right:(()=>{const b=el(`<button class="iconbtn" aria-label="Settings">${icon("settings")}</button>`);b.onclick=()=>go("settings");return b;})()}));
   const s = el(`<div class="screen"></div>`);
 
   // resume banner
   if(state.active){
     const exCount = state.active.exercises.length;
-    const r = el(`<div class="resume"><span class="dot"></span><div class="grow"><div class="title" style="font-weight:800">Workout in progress</div><div class="sub muted">${exCount} exercise${exCount!==1?"s":""} · tap to resume</div></div><span style="font-size:22px">▶</span></div>`);
-    r.onclick=()=>go("workout"); s.appendChild(r);
+    const r = el(`<div class="resume" role="button" tabindex="0"><span class="dot"></span><div class="grow"><div class="title" style="font-weight:800">Workout in progress</div><div class="sub muted">${exCount} exercise${exCount!==1?"s":""} · tap to resume</div></div>${icon("play","lg")}</div>`);
+    r.onclick=()=>go("workout"); r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();r.click();}}; s.appendChild(r);
   }
 
   // hero stats
@@ -1074,10 +1359,10 @@ function renderHome(app){
   const total = state.workouts.length;
   const streak = computeStreak();
 
-  s.appendChild(el(`<div class="hero">
-    <h2>${greeting()}</h2>
-    <p>${total? `You've logged ${total} workout${total!==1?"s":""}. Keep the fire going.` : "Let's log your first workout."}</p>
-  </div>`));
+  s.appendChild(el(`<div class="home-greeting"><div class="page-kicker">Training dashboard</div><h2>${greeting()}</h2><p>${total?`${total} workout${total!==1?"s":""} logged. Keep building.`:"Your first session starts here."}</p></div>`));
+
+  // today's plan
+  const pc = planCard(); if(pc) s.appendChild(pc);
 
   s.appendChild(el(`<div class="stat-grid">
     <div class="stat"><div class="num">${thisWeek}</div><div class="lbl">This week</div></div>
@@ -1085,17 +1370,16 @@ function renderHome(app){
     <div class="stat"><div class="num">${total}</div><div class="lbl">All time</div></div>
   </div>`));
 
-  // today's plan
-  const pc = planCard(); if(pc) s.appendChild(pc);
+  const quick=el(`<div class="quick-grid"></div>`);
+  const start = el(`<button class="btn ghost">${icon("plus")}<span>Empty workout</span></button>`);
+  start.onclick=startEmpty;
 
-  const start = el(`<button class="btn ghost" style="margin-bottom:10px">＋  Start Empty Workout</button>`);
-  start.onclick=startEmpty; s.appendChild(start);
+  const fromR = el(`<button class="btn ghost">${icon("routines")}<span>Browse routines</span></button>`);
+  fromR.onclick=()=>setTab("routines");
 
-  const fromR = el(`<button class="btn ghost" style="margin-bottom:10px">📋  Browse all Routines</button>`);
-  fromR.onclick=()=>setTab("routines"); s.appendChild(fromR);
-
-  const bw = el(`<button class="btn ghost">🧳  No equipment? Bodyweight workout</button>`);
-  bw.onclick=startBodyweight; s.appendChild(bw);
+  const bw = el(`<button class="btn ghost">${icon("body")}<span>Bodyweight session</span></button>`);
+  bw.onclick=startBodyweight;
+  [start,fromR,bw].forEach(b=>quick.appendChild(b)); s.appendChild(quick);
 
   // recent workouts
   if(state.workouts.length){
@@ -1124,11 +1408,29 @@ function computeStreak(){
 function equipModeSeg(){
   const seg=el(`<div class="btn-row" style="margin:0 0 10px"></div>`);
   [["db","Dumbbell"],["combo","Combo"],["bb","Barbell"]].forEach(([val,label])=>{
-    const b=el(`<button class="btn ${equipMode()===val?"primary":"ghost"} sm" style="flex:1">${label}</button>`);
+    const b=el(`<button class="btn ${equipMode()===val?"primary":"ghost"} sm" aria-pressed="${equipMode()===val}" style="flex:1">${label}</button>`);
     b.onclick=()=>{ state.settings.equipMode=val; save("settings"); render(); };
     seg.appendChild(b);
   });
   return seg;
+}
+
+function variantLabel(v=state.settings.planVariant||"his"){ return v==="hers"?"Hers · Tone":"His · Mass"; }
+function equipModeLabel(v=equipMode()){ return v==="bb"?"Barbell":v==="db"?"Dumbbell":"Combo"; }
+function openWorkoutSetup(){
+  openSheet("Workout setup",body=>{
+    body.appendChild(el(`<div class="muted" style="font-size:13px;margin:-3px 0 14px">Choose the prescription and equipment Forge should use when resolving routine movements.</div>`));
+    body.appendChild(el(`<div class="section-label" style="margin:0 0 7px">Prescription</div>`));
+    const people=el(`<div class="btn-row" style="margin-bottom:16px"></div>`);
+    [["his","His · Mass"],["hers","Hers · Tone"]].forEach(([v,l])=>{ const active=(state.settings.planVariant||"his")===v,b=el(`<button class="btn ${active?"primary":"ghost"} sm" aria-pressed="${active}">${l}</button>`); b.onclick=()=>{state.settings.planVariant=v;save("settings");closeSheet();render();};people.appendChild(b); }); body.appendChild(people);
+    body.appendChild(el(`<div class="section-label" style="margin:0 0 7px">Equipment</div>`));
+    const equipment=el(`<div class="btn-row"></div>`);
+    [["db","Dumbbell"],["combo","Combo"],["bb","Barbell"]].forEach(([v,l])=>{ const active=equipMode()===v,b=el(`<button class="btn ${active?"primary":"ghost"} sm" aria-pressed="${active}">${l}</button>`); b.onclick=()=>{state.settings.equipMode=v;save("settings");closeSheet();render();};equipment.appendChild(b); }); body.appendChild(equipment);
+  });
+}
+function workoutSetupControl(){
+  const b=el(`<button class="setup-compact" aria-label="Change workout setup">${icon("equipment","sm")}<span>${esc(variantLabel().split(" · ")[0])} · ${esc(equipModeLabel())}</span>${icon("chevronDown","sm")}</button>`);
+  b.onclick=openWorkoutSetup; return b;
 }
 
 function planCard(){
@@ -1137,7 +1439,7 @@ function planCard(){
   const cw = cycleWeekOf(Date.now());
   const wp = planFor(Date.now());
   const card = el(`<div class="plan-card"></div>`);
-  card.appendChild(el(`<div class="plan-top"><span class="section-label" style="margin:0">This Week's Plan</span><span class="chip accent right">Week ${cw} · ${cw===1?"A/B/C":"D/E/F"}</span></div>`));
+  card.appendChild(el(`<div class="plan-top"><span class="section-label" style="margin:0;color:var(--accent-2)">Today's training</span><span class="chip accent right">Week ${cw} · ${cw===1?"A/B/C":"D/E/F"}</span></div>`));
 
   // deferral markers for the strip (only when the moved workout still lies ahead)
   const showMove = p.deferred && p.deferred.dueISO>=today;
@@ -1167,30 +1469,22 @@ function planCard(){
     if(due.deferred) titleRow.appendChild(el(`<span class="deferred-chip">deferred</span>`));
     card.appendChild(titleRow);
 
-    // His / Hers toggle
-    const seg = el(`<div class="btn-row" style="margin:12px 0 8px"></div>`);
-    [["his","His · Mass"],["hers","Hers · Tone"]].forEach(([val,label])=>{
-      const b = el(`<button class="btn ${variant===val?"primary":"ghost"} sm" style="flex:1">${label}</button>`);
-      b.onclick=()=>{ state.settings.planVariant=val; save("settings"); render(); };
-      seg.appendChild(b);
-    });
-    card.appendChild(seg);
-    // Dumbbell / Combo / Barbell equipment toggle
-    card.appendChild(equipModeSeg());
+    const setupRow=el(`<div class="row" style="margin:13px 0 11px"><span class="muted" style="font-size:12px;flex:1">Prescription & equipment</span></div>`);
+    setupRow.appendChild(workoutSetupControl()); card.appendChild(setupRow);
 
     const r = planRoutine(due.key, variant);
     if(r){
-      const startB = el(`<button class="btn primary" style="margin-bottom:8px">▶  Start Workout ${esc(due.key)} (${variant==="his"?"His":"Hers"})</button>`);
+      const startB = el(`<button class="btn primary" style="margin-bottom:8px">${icon("play")}<span>Start Workout ${esc(due.key)}</span></button>`);
       startB.onclick=()=>startFromRoutine(r.id, due.key);
       card.appendChild(startB);
     } else {
-      const fix = el(`<button class="btn ghost" style="margin-bottom:8px">↺ Restore preset routines</button>`);
+      const fix = el(`<button class="btn ghost" style="margin-bottom:8px">${icon("history")}<span>Restore preset routines</span></button>`);
       fix.onclick=()=>{ restorePresets(); render(); toast("Preset routines restored"); };
       card.appendChild(fix);
     }
 
     // defer / skip button
-    const deferB = el(`<button class="btn ghost sm" style="width:100%">${due.count>=1?"⏭  Defer again — will skip this workout":"🕓  Defer until tomorrow"}</button>`);
+    const deferB = el(`<button class="btn ghost sm" style="width:100%">${icon("clock","sm")}<span>${due.count>=1?"Defer again — will skip this workout":"Defer until tomorrow"}</span></button>`);
     deferB.onclick=()=>{
       const msg = due.count>=1
         ? `Defer again? Workout ${due.key} will be skipped and you'll move to the next routine. That's +1 bodyweight set owed.`
@@ -1201,7 +1495,7 @@ function planCard(){
   } else {
     // ---- rest day ----
     card.appendChild(el(`<div class="plan-day">Today · ${DAY_NAME[dow]}</div>`));
-    card.appendChild(el(`<div class="plan-title">Rest / active recovery 😌</div>`));
+    card.appendChild(el(`<div class="plan-title">Rest / active recovery</div>`));
     let nx;
     if(p.deferred && p.deferred.dueISO>today) nx={dow:dowOfISO(p.deferred.dueISO), key:p.deferred.key, deferred:true};
     else nx=nextPlanDay(Date.now());
@@ -1211,11 +1505,11 @@ function planCard(){
   // penalty banner
   if(p.penaltySets>0){
     const pen = el(`<div class="penalty-banner">🏋️ Penalty: <b>${p.penaltySets}</b> bodyweight set${p.penaltySets!==1?"s":""} owed — your choice of exercise.</div>`);
-    const knock = el(`<button class="btn ghost sm" style="width:100%;margin-top:8px">✓ Knock one out</button>`);
+    const knock = el(`<button class="btn ghost sm" style="width:100%;margin-top:8px">${icon("check","sm")}<span>Knock one out</span></button>`);
     knock.onclick=knockPenalty; pen.appendChild(knock);
     card.appendChild(pen);
   }
-  const deloadB=el(`<button class="btn ${deloadActive()?"good":"ghost"} sm" style="width:100%;margin-top:12px">${deloadActive()?"✓ Deload active — tap to end":"🌿 Make this a deload week"}</button>`);
+  const deloadB=el(`<button class="btn ${deloadActive()?"good":"ghost"} sm" style="width:100%;margin-top:12px">${deloadActive()?icon("check","sm")+"<span>Deload active — tap to end</span>":"<span>Make this a deload week</span>"}</button>`);
   deloadB.onclick=toggleDeload; card.appendChild(deloadB);
   return card;
 }
@@ -1255,56 +1549,65 @@ function startFromRoutine(rid, planKey){
   state.active = {id:uid(), name:r.name, start:Date.now(), date:todayISO(), note:r.note||"", planKey:planKey||null, deload:isDeload,
     exercises: r.exercises.map(re=>{
       const mapped = mapExerciseForMode(re.name, mode);
-      const lib = mapped!==re.name && state.exercises.find(x=>x.name===mapped);
-      return { id:uid(), name:mapped, muscle:(lib&&lib.muscle)||re.muscle,
+      const lib = mapped!==re.name && exerciseByRef(mapped);
+      return attachExerciseRef({ id:uid(), name:mapped, muscle:(lib&&lib.muscle)||re.muscle,
         note: mapped===re.name ? (re.note||"") : "",   // old form cue doesn't apply; ⓘ has the how-to
         target:targetForMappedExercise(re.reps||"",re.name,mapped),
-        sets: Array.from({length:isDeload?deloadSetCount(re.sets):re.sets||1}, ()=>({weight:"",reps:"",done:false})) };
+        sets: Array.from({length:isDeload?deloadSetCount(re.sets):re.sets||1}, ()=>({weight:"",reps:"",done:false})) },mapped);
     })
   };
   save("active"); setTab("home"); go("workout");
 }
 
+function workoutSetProgress(w){
+  const total=w.exercises.reduce((n,e)=>n+e.sets.length,0), done=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
+  return {total,done,pct:total?Math.round(done/total*100):0};
+}
+function openWorkoutDetails(){
+  const w=state.active; if(!w) return;
+  openSheet("Session details",body=>{
+    const nameF=el(`<div class="field"><label>Workout name</label><input class="input" value="${esc(w.name||"")}" placeholder="Workout name"/></div>`);
+    const dateF=el(`<div class="field"><label>Workout date</label><input class="input" type="date" value="${esc(w.date||todayISO())}" max="${todayISO()}"/></div>`);
+    body.appendChild(nameF); body.appendChild(dateF);
+    const saveB=el(`<button class="btn primary">${icon("check")}<span>Save details</span></button>`);
+    saveB.onclick=()=>{w.name=$("input",nameF).value.trim()||"Workout";w.date=$("input",dateF).value||todayISO();save("active");closeSheet();render();};body.appendChild(saveB);
+  });
+}
+
 function renderWorkout(app){
   const w = state.active;
   if(!w){ setTab("home"); return; }
-  const timer = el(`<span class="timer-pill" id="wkTimer">0:00</span>`);
+  const timer = el(`<span class="timer-pill" id="wkTimer" role="timer" aria-label="Workout timer">0:00</span>`);
   app.appendChild(header(w.name||"Workout",{right:timer, back:true}));
 
   // override back to confirm? back just goes home but keeps active. Use custom back via nav remains.
   const s = el(`<div class="screen"></div>`);
 
-  // editable name
-  const nameField = el(`<input class="input" value="${esc(w.name||"")}" placeholder="Workout name" style="margin-bottom:10px;font-weight:700"/>`);
-  nameField.onchange=()=>{ w.name=nameField.value.trim()||"Workout"; save("active"); };
-  s.appendChild(nameField);
-
-  // editable date
   if(!w.date) w.date=todayISO();
-  const dateRow = el(`<div class="field" style="margin-bottom:14px"><label>Workout date</label></div>`);
-  const dateField = el(`<input class="input" type="date" value="${esc(w.date)}" max="${todayISO()}" style="font-weight:700"/>`);
-  dateField.onchange=()=>{ w.date=dateField.value||todayISO(); save("active"); };
-  dateRow.appendChild(dateField); s.appendChild(dateRow);
+  const session=el(`<div class="session-strip"><div class="catalog-equip">${icon("calendar")}</div><div class="session-main"><div style="font-weight:800">Session details</div><div class="session-date">${esc(fmtDate(isoToTs(w.date)))} · name and date</div></div></div>`);
+  const editSession=el(`<button class="toolbtn" aria-label="Edit workout name and date">${icon("edit","sm")}<span>Edit</span></button>`); editSession.onclick=openWorkoutDetails; session.appendChild(editSession); s.appendChild(session);
+  const progress=workoutSetProgress(w);
+  s.appendChild(el(`<div class="workout-progress"><div class="top"><span>Working sets</span><span>${progress.done} / ${progress.total} complete</span></div><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.pct}"><div class="fill" style="width:${progress.pct}%"></div></div></div>`));
 
   // routine note / warm-up banner
   if(w.note){ s.appendChild(el(`<div class="note-banner">${esc(w.note)}</div>`)); }
   if(w.deload){ s.appendChild(el(`<div class="deload-banner">🌿 <b>Deload session</b> · working sets were reduced; keep every rep crisp and leave plenty in reserve.</div>`)); }
 
   if(!w.exercises.length){
-    s.appendChild(el(`<div class="empty"><span class="emo">🏋️</span><h3>No exercises yet</h3><div>Add your first exercise to start logging sets.</div></div>`));
+    s.appendChild(el(`<div class="empty">${icon("dumbbell","lg")}<h3>No exercises yet</h3><div>Add your first exercise to start logging sets.</div></div>`));
   }
 
   w.exercises.forEach((ex,ei)=> s.appendChild(exerciseBlock(ex,ei)) );
 
   if(w.exercises.some(ex=>altsFor(ex.name).length)){
-    const shuffleAll = el(`<button class="btn ghost" style="margin-top:4px;margin-bottom:10px">🔀  Shuffle all movements</button>`);
+    const shuffleAll = el(`<button class="btn ghost" style="margin-top:4px;margin-bottom:10px">${icon("shuffle")}<span>Shuffle all movements</span></button>`);
     shuffleAll.onclick=()=>shuffleAllExercises();
     s.appendChild(shuffleAll);
   }
 
-  const add = el(`<button class="btn ghost" style="margin-top:4px">＋  Add Exercise</button>`);
+  const add = el(`<button class="btn ghost" style="margin-top:4px">${icon("plus")}<span>Add Exercise</span></button>`);
   add.onclick=()=>openPicker(sel=>{
-    sel.forEach(e=> w.exercises.push({id:uid(), name:e.name, muscle:e.muscle, sets:[{weight:"",reps:"",done:false}]}) );
+    sel.forEach(e=> w.exercises.push(attachExerciseRef({id:uid(), name:e.name, muscle:e.muscle, sets:[{weight:"",reps:"",done:false}]},e.name)) );
     save("active"); render();
   });
   s.appendChild(add);
@@ -1316,7 +1619,7 @@ function renderWorkout(app){
   notesF.appendChild(notesIn); s.appendChild(notesF);
 
   s.appendChild(el(`<hr class="hr"/>`));
-  const finish = el(`<button class="btn good" style="margin-bottom:10px">✓  Finish Workout</button>`);
+  const finish = el(`<button class="btn good" style="margin-bottom:10px">${icon("check")}<span>Finish Workout</span></button>`);
   finish.onclick=finishWorkout; s.appendChild(finish);
   const cancel = el(`<button class="btn danger">Discard Workout</button>`);
   cancel.onclick=()=>{ if(confirmAct("Discard this workout? This can't be undone.")){ state.active=null; save("active"); stopTimer(); stopRest(); setTab("home"); } };
@@ -1331,30 +1634,24 @@ function exerciseBlock(ex,ei){
   const w = state.active;
   const blk = el(`<div class="exercise"></div>`);
   const head = el(`<div class="exercise-head"><span class="name">${esc(ex.name)}</span></div>`);
-  head.appendChild(infoBtn(ex.name));
-  if(ex.target) head.appendChild(el(`<span class="chip accent" style="margin-left:auto">🎯 ${esc(ex.target)}</span>`));
+  if(ex.target) head.appendChild(el(`<span class="chip accent" style="margin-left:auto">${esc(ex.target)}</span>`));
   const hasAlts = altsFor(ex.name).length>0;
-  if(hasAlts){
-    const shuf = el(`<button class="iconbtn" title="Shuffle movement" style="width:34px;height:34px;font-size:15px;background:var(--surface-2);margin-left:${ex.target?"8px":"auto"}">🔀</button>`);
-    shuf.onclick=()=>shuffleExercise(ei);
-    head.appendChild(shuf);
-  }
-  const menu = el(`<button class="iconbtn" style="width:34px;height:34px;font-size:16px;background:var(--surface-2);margin-left:${(ex.target||hasAlts)?"8px":"auto"}">⋯</button>`);
-  menu.onclick=()=>openExerciseMenu(ei);
-  head.appendChild(menu);
   blk.appendChild(head);
   if(ex.note) blk.appendChild(el(`<div class="cue">${esc(ex.note)}</div>`));
-  const myCue=personalCueFor(ex.name); if(myCue) blk.appendChild(el(`<div class="personal-cue">📌 ${esc(myCue)}</div>`));
+  const myCue=personalCueFor(ex.name); if(myCue) blk.appendChild(el(`<div class="personal-cue">${esc(myCue)}</div>`));
 
   const prevSets = lastPerformance(ex.name);
   const sug = suggestNext(ex, prevSets);
-  if(sug) blk.appendChild(el(`<div class="suggest">📈 ${esc(sug.text)}</div>`));
+  if(sug) blk.appendChild(el(`<div class="suggest">${icon("progress","sm")} ${esc(sug.text)}</div>`));
+  const tools=el(`<div class="ex-toolbar" aria-label="Exercise tools"></div>`);
+  const form=el(`<button class="toolbtn">${icon("info","sm")}<span>Form</span></button>`);form.onclick=()=>openExerciseInfo(ex.name);tools.appendChild(form);
+  if(hasAlts){const swap=el(`<button class="toolbtn">${icon("swap","sm")}<span>Swap</span></button>`);swap.onclick=()=>openSwap(ei);tools.appendChild(swap);}
   if(isBarbell(ex)){
-    const tools=el(`<div class="exercise-tools"></div>`);
-    const warm=el(`<button class="btn ghost sm">🔥 Warm up</button>`); warm.onclick=()=>openWarmup(ex);
-    const plates=el(`<button class="btn ghost sm">⚖️ Plates</button>`); plates.onclick=()=>openPlateCalculator(ex);
-    tools.appendChild(warm); tools.appendChild(plates); blk.appendChild(tools);
+    const warm=el(`<button class="toolbtn">${icon("flame","sm")}<span>Warm-up</span></button>`); warm.onclick=()=>openWarmup(ex);
+    const plates=el(`<button class="toolbtn">${icon("scale","sm")}<span>Plates</span></button>`); plates.onclick=()=>openPlateCalculator(ex);
+    tools.appendChild(warm); tools.appendChild(plates);
   }
+  const menu=el(`<button class="toolbtn" aria-label="More options for ${esc(ex.name)}">${icon("more","sm")}<span>More</span></button>`);menu.onclick=()=>openExerciseMenu(ei);tools.appendChild(menu);blk.appendChild(tools);
   const table = el(`<div class="set-table"></div>`);
   table.appendChild(el(`<div class="set-hd"><span>SET</span><span style="text-align:center">PREV</span><span style="text-align:center">${U().toUpperCase()}</span><span style="text-align:center">REPS</span><span></span></div>`));
 
@@ -1374,13 +1671,13 @@ function exerciseBlock(ex,ei){
     else if(sug && sug.type==="reps" && pv){ const r=Math.min((Number(pv.reps)||0)+1, sug.hi); if(r>0){ phR=String(r); fillR=phR; } }
     else if(sug && sug.type==="time" && pv){ phR=String((Number(pv.reps)||0)+sug.add); fillR=phR; }
 
-    const wIn = el(`<input class="cell" inputmode="decimal" placeholder="${esc(phW)}" value="${set.weight!==""?set.weight:""}"/>`);
+    const wIn = el(`<input class="cell" inputmode="decimal" aria-label="${esc(ex.name)} set ${si+1} weight in ${U()}" placeholder="${esc(phW)}" value="${set.weight!==""?set.weight:""}"/>`);
     wIn.oninput=()=>{ set.weight=wIn.value; save("active"); };
-    const rIn = el(`<input class="cell" inputmode="numeric" placeholder="${esc(phR)}" value="${set.reps!==""?set.reps:""}"/>`);
+    const rIn = el(`<input class="cell" inputmode="numeric" aria-label="${esc(ex.name)} set ${si+1} reps" placeholder="${esc(phR)}" value="${set.reps!==""?set.reps:""}"/>`);
     rIn.oninput=()=>{ set.reps=rIn.value; save("active"); };
     rw.appendChild(wIn); rw.appendChild(rIn);
 
-    const chk = el(`<button class="checkbtn ${set.done?"on":""}">✓</button>`);
+    const chk = el(`<button class="checkbtn ${set.done?"on":""}" aria-label="${set.done?"Mark set incomplete":"Complete set"}">${icon("check")}</button>`);
     chk.onclick=()=>{
       set.done=!set.done;
       if(set.done){
@@ -1400,7 +1697,7 @@ function exerciseBlock(ex,ei){
   });
   blk.appendChild(table);
 
-  const addSet = el(`<button class="btn addset sm" style="width:100%;margin-top:8px">＋ Add Set</button>`);
+  const addSet = el(`<button class="btn addset sm" style="width:100%;margin-top:8px">${icon("plus","sm")}<span>Add Set</span></button>`);
   addSet.onclick=()=>{ const last=ex.sets[ex.sets.length-1]; ex.sets.push({weight:last?last.weight:"",reps:last?last.reps:"",done:false}); save("active"); render(); };
   blk.appendChild(addSet);
   return blk;
@@ -1440,14 +1737,14 @@ function openExerciseMenu(ei){
   const canSwap = altsFor(ex.name).length>0;
   openSheet(esc(ex.name), body=>{
     const opts=[
-      canSwap && {t:"🔀 Shuffle this movement", f:()=>{ shuffleExercise(ei); closeSheet(); }},
-      canSwap && {t:"🔁 Swap movement…", f:()=>{ closeSheet(); openSwap(ei); }},
-      {t:"Remove last set", f:()=>{ if(ex.sets.length>1){ex.sets.pop(); save("active"); render();} closeSheet(); }},
-      {t:"Move up", f:()=>{ if(ei>0){[w.exercises[ei-1],w.exercises[ei]]=[w.exercises[ei],w.exercises[ei-1]]; save("active"); render();} closeSheet(); }},
-      {t:"Move down", f:()=>{ if(ei<w.exercises.length-1){[w.exercises[ei+1],w.exercises[ei]]=[w.exercises[ei],w.exercises[ei+1]]; save("active"); render();} closeSheet(); }},
-      {t:"Remove exercise", danger:true, f:()=>{ w.exercises.splice(ei,1); save("active"); render(); closeSheet(); }},
+      canSwap && {i:"shuffle",t:"Shuffle this movement", f:()=>{ shuffleExercise(ei); closeSheet(); }},
+      canSwap && {i:"swap",t:"Swap movement…", f:()=>{ closeSheet(); openSwap(ei); }},
+      {i:"trash",t:"Remove last set", f:()=>{ if(ex.sets.length>1){ex.sets.pop(); save("active"); render();} closeSheet(); }},
+      {i:"chevronLeft",t:"Move up", f:()=>{ if(ei>0){[w.exercises[ei-1],w.exercises[ei]]=[w.exercises[ei],w.exercises[ei-1]]; save("active"); render();} closeSheet(); }},
+      {i:"chevronDown",t:"Move down", f:()=>{ if(ei<w.exercises.length-1){[w.exercises[ei+1],w.exercises[ei]]=[w.exercises[ei],w.exercises[ei+1]]; save("active"); render();} closeSheet(); }},
+      {i:"trash",t:"Remove exercise", danger:true, f:()=>{ w.exercises.splice(ei,1); save("active"); render(); closeSheet(); }},
     ].filter(Boolean);
-    opts.forEach(o=>{ const b=el(`<button class="btn ${o.danger?"danger":"ghost"}" style="margin-bottom:8px">${o.t}</button>`); b.onclick=o.f; body.appendChild(b); });
+    opts.forEach(o=>{ const b=el(`<button class="btn ${o.danger?"danger":"ghost"}" style="margin-bottom:8px">${icon(o.i)}<span>${esc(o.t)}</span></button>`); b.onclick=o.f; body.appendChild(b); });
   });
 }
 
@@ -1466,12 +1763,12 @@ function shuffleExercise(ei){
   const w=state.active; const ex=w.exercises[ei]; const alts=altsFor(ex.name);
   if(!alts.length){ toast("No alternates for this movement"); return; }
   const pick=alts[Math.floor(Math.random()*alts.length)];
-  ex.name=pick.name; ex.muscle=pick.muscle; ex.note=""; save("active"); render();
+  ex.name=pick.name; ex.muscle=pick.muscle; ex.note=""; attachExerciseRef(ex,pick.name); save("active"); render();
   toast("🔀 "+pick.name);
 }
 function shuffleAllExercises(){
   const w=state.active; let n=0;
-  w.exercises.forEach(ex=>{ const alts=altsFor(ex.name); if(alts.length){ const p=alts[Math.floor(Math.random()*alts.length)]; ex.name=p.name; ex.muscle=p.muscle; ex.note=""; n++; } });
+  w.exercises.forEach(ex=>{ const alts=altsFor(ex.name); if(alts.length){ const p=alts[Math.floor(Math.random()*alts.length)]; ex.name=p.name; ex.muscle=p.muscle; ex.note=""; attachExerciseRef(ex,p.name); n++; } });
   save("active"); render();
   toast(n?`🔀 Shuffled ${n} movement${n!==1?"s":""}`:"No alternates available");
 }
@@ -1481,14 +1778,14 @@ function openSwap(ei){
   let eqFilter="all";
   openSheet("Swap movement", body=>{
     if(lbl) body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px;font-size:13px">Same target & motion · <b style="color:var(--accent-2)">${esc(lbl)}</b></div>`));
-    renderSuggestedSubstitutes(body,ex,o=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; save("active"); closeSheet(); render(); toast("Swapped → "+o.name); });
+    renderSuggestedSubstitutes(body,ex,o=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; attachExerciseRef(ex,o.name); save("active"); closeSheet(); render(); toast("Swapped → "+o.name); });
     if(suggestedSubs(ex.name).length) body.appendChild(el(`<div class="section-label" style="margin:16px 0 6px">All same-pattern options</div>`));
     body.appendChild(equipChipRow(eqFilter, v=>{ eqFilter=v; drawAlts(); }));
     const listWrap=el(`<div></div>`); body.appendChild(listWrap);
-    const cur=state.exercises.find(x=>x.name===ex.name);
+    const cur=exerciseByRef(ex);
     const mk=(o,current)=>{
       const row=el(`<div class="pick-row"><div class="grow"><div class="title" style="white-space:normal">${esc(o.name)}</div><div class="mg">${esc(o.muscle||"")}</div></div>${equipTagHTML(o)}${current?'<span class="cat-tag">current</span>':'<span style="font-size:20px;color:var(--faint)">›</span>'}</div>`);
-      if(!current) row.onclick=()=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; save("active"); closeSheet(); render(); toast("Swapped → "+o.name); };
+      if(!current) row.onclick=()=>{ ex.name=o.name; ex.muscle=o.muscle; ex.note=""; attachExerciseRef(ex,o.name); save("active"); closeSheet(); render(); toast("Swapped → "+o.name); };
       return row;
     };
     function drawAlts(){
@@ -1569,7 +1866,7 @@ function stopTimer(){ if(timerInt){clearInterval(timerInt); timerInt=null;} }
 /* ---------- Rest timer ---------- */
 let restInt=null, restEnd=0, restLabel="";
 function adaptiveRestSeconds(ex){
-  const lib=state.exercises.find(x=>x.name===ex.name)||ex;
+  const lib=exerciseByRef(ex)||ex;
   const range=parseRepRange(ex.target), reps=range?range.hi:10;
   if(lib.equipment==="barbell") return reps<=6?180:reps<=8?150:reps<=12?120:90;
   if(["Arms","Shoulders","Core"].includes(ex.muscle)) return reps>=15?45:60;
@@ -1630,7 +1927,7 @@ function renderHistory(app){
 function renderHistoryDetail(app,v){
   const w=state.workouts.find(x=>x.id===v.id);
   if(!w){ back(); return; }
-  const del=el(`<button class="iconbtn" style="background:var(--surface-2)">🗑</button>`);
+  const del=el(`<button class="iconbtn" aria-label="Delete workout" style="background:var(--surface-2)">${icon("trash")}</button>`);
   del.onclick=()=>{ if(confirmAct("Delete this workout permanently?")){
     state.workouts=state.workouts.filter(x=>x.id!==w.id); save("workouts");
     state.deleted.push({id:w.id, ts:Date.now()}); save("deleted");   // tombstone so sync deletes it everywhere
@@ -1653,12 +1950,12 @@ function renderHistoryDetail(app,v){
     blk.appendChild(tbl); s.appendChild(blk);
   });
   if(w.notes){ s.appendChild(el(`<div class="note-banner" style="background:var(--surface-2);border-color:var(--border);color:var(--muted)">📝 ${esc(w.notes)}</div>`)); }
-  const repeat=el(`<button class="btn primary" style="margin-top:6px">🔁  Repeat this Workout</button>`);
+  const repeat=el(`<button class="btn primary" style="margin-top:6px">${icon("history")}<span>Repeat this Workout</span></button>`);
   repeat.onclick=()=>{
     if(state.active && !confirmAct("Discard the workout in progress?")) return;
     state.active={id:uid(),name:w.name,start:Date.now(),date:todayISO(),
-      exercises:w.exercises.map(ex=>({id:uid(),name:ex.name,muscle:ex.muscle,
-        sets:ex.sets.map(()=>({weight:"",reps:"",done:false}))}))};
+      exercises:w.exercises.map(ex=>attachExerciseRef({id:uid(),name:ex.name,muscle:ex.muscle,
+        sets:ex.sets.map(()=>({weight:"",reps:"",done:false}))},ex.name))};
     save("active"); setTab("home"); go("workout");
   };
   s.appendChild(repeat);
@@ -1672,7 +1969,7 @@ function bodyweightCard(){
   const bw=[...state.bodyweights].sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
   const card=el(`<div class="chart-card"></div>`);
   const head=el(`<div class="row" style="margin-bottom:4px"><div class="grow"><h4 style="margin:0">Body weight</h4></div></div>`);
-  const addB=el(`<button class="btn primary sm">＋ Log</button>`); addB.onclick=logBodyweight; head.appendChild(addB);
+  const addB=el(`<button class="btn primary sm">${icon("plus","sm")}<span>Log</span></button>`); addB.onclick=logBodyweight; head.appendChild(addB);
   card.appendChild(head);
   if(!bw.length){ card.appendChild(el(`<div class="csub" style="margin:6px 0 0">Track your weight to see the trend next to your training.</div>`)); return card; }
   const latest=bw[bw.length-1], first=bw[0], delta=latest.weight-first.weight, sign=delta>0?"+":"";
@@ -1742,7 +2039,7 @@ function muscleSetsCard(){
 const FEATURED_LIFTS=["Back Squat","Front Squat","Barbell Bench Press","Deadlift","Romanian Deadlift","Overhead Press","Barbell Row","Pull-Up","Chin-Up","DB Goblet Squat","DB Front Squat","Flat DB Bench Press","Incline DB Press","DB Romanian Deadlift","One-Arm DB Row","DB Overhead Press","Bulgarian Split Squat"];
 function strengthRecord(name){
   let bestW=0,bestE=0,bestReps=0,bestSet=null,last=0; const repBests={};
-  state.workouts.forEach(w=>w.exercises.filter(e=>e.name===name).forEach(ex=>{ last=Math.max(last,w.end); ex.sets.forEach(s=>{
+  state.workouts.forEach(w=>w.exercises.filter(e=>sameExercise(e,name)).forEach(ex=>{ last=Math.max(last,w.end); ex.sets.forEach(s=>{
     const wt=Number(s.weight)||0,reps=Number(s.reps)||0,e=epley(wt,reps); bestW=Math.max(bestW,wt); bestReps=Math.max(bestReps,reps);
     if(e>bestE){ bestE=e; bestSet={weight:wt,reps}; }
     if(wt&&reps>0&&reps<=20) repBests[reps]=Math.max(repBests[reps]||0,wt);
@@ -1756,7 +2053,7 @@ function openStrengthRecord(record){
     const reps=Object.keys(record.repBests).map(Number).sort((a,b)=>a-b);
     if(reps.length){ body.appendChild(el(`<div class="section-label" style="margin:10px 0 5px">Rep records</div>`));
       const box=el(`<div class="card" style="padding:4px 14px"></div>`); reps.forEach(r=>box.appendChild(el(`<div class="summary-muscle"><span>${r} rep${r!==1?"s":""}</span><b>${fmtNum(record.repBests[r])} ${U()}</b></div>`))); body.appendChild(box); }
-    const pts=[...state.workouts].sort((a,b)=>a.end-b.end).map(w=>{ const ex=w.exercises.find(e=>e.name===record.name); if(!ex)return null; const y=Math.max(...ex.sets.map(s=>epley(s.weight,s.reps))); return y?{x:w.end,y}:null; }).filter(Boolean);
+    const pts=[...state.workouts].sort((a,b)=>a.end-b.end).map(w=>{ const ex=w.exercises.find(e=>sameExercise(e,record.name)); if(!ex)return null; const y=Math.max(...ex.sets.map(s=>epley(s.weight,s.reps))); return y?{x:w.end,y}:null; }).filter(Boolean);
     if(pts.length){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 5px">Strength trend</div>`)); body.appendChild(lineChart(pts)); }
   });
 }
@@ -1765,31 +2062,42 @@ function strengthRecordsCard(){
   if(!records.length){
     const names=[...new Set(state.workouts.flatMap(w=>w.exercises.map(e=>e.name)))]; records=names.map(strengthRecord).filter(r=>r&&r.bestE>0).sort((a,b)=>b.last-a.last).slice(0,6);
   }
-  const card=el(`<div class="chart-card"><h4>Strength records</h4><div class="csub">Key lifts · tap one for rep records and its trend</div></div>`);
+  const card=el(`<div class="chart-card"><div class="row" style="margin-bottom:2px"><div class="catalog-equip">${icon("trophy")}</div><div class="grow"><h4 style="margin:0">Strength records</h4><div class="csub" style="margin:2px 0 0">Key lifts · tap one for rep records and its trend</div></div></div></div>`);
   if(!records.length){ card.appendChild(el(`<div class="muted" style="padding:8px 0">Complete weighted sets to build your record board.</div>`)); return card; }
   records.slice(0,8).forEach(r=>{ const value=r.bestE>0?`${fmtNum(r.bestE)} ${U()}`:`${r.bestReps} reps`;
-    const row=el(`<div class="record-row row" style="cursor:pointer"><div class="grow"><div class="title">${esc(r.name)}</div><div class="sub">${r.bestSet?`Best set ${fmtNum(r.bestSet.weight)} × ${r.bestSet.reps}`:`Best bodyweight set · ${r.bestReps} reps`} · ${fmtDate(r.last)}</div></div><div style="text-align:right"><div style="font-weight:800;color:var(--accent)">${esc(value)}</div><div class="pill">${r.bestE>0?"est 1RM":"best"}</div></div></div>`);
+    const row=el(`<div class="record-row row" style="cursor:pointer"><div class="grow"><div class="title">${esc(r.name)}</div><div class="sub">${r.bestSet?`Best set ${fmtNum(r.bestSet.weight)} × ${r.bestSet.reps}`:`Best bodyweight set · ${r.bestReps} reps`} · ${fmtDate(r.last)}</div></div><div style="text-align:right"><div class="record-value">${esc(value)}</div><div class="pill">${r.bestE>0?"est 1RM":"best"}</div></div></div>`);
     row.onclick=()=>openStrengthRecord(r); card.appendChild(row);
   });
   return card;
 }
 
+function progressSummaryCard(hist){
+  const ws=weekStartTs(Date.now()), recent=hist.filter(w=>w.end>=ws), volume=recent.reduce((n,w)=>n+workoutVolume(w),0);
+  const prs=recent.reduce((n,w)=>n+w.exercises.reduce((m,e)=>m+e.sets.filter(s=>s.pr).length,0),0);
+  return el(`<div class="progress-hero" aria-label="This week's progress summary">
+    <div class="progress-metric primary"><div class="value">${recent.length}</div><div class="label">Workouts</div></div>
+    <div class="progress-metric"><div class="value">${fmtNum(volume).toLocaleString()}</div><div class="label">${U()} volume</div></div>
+    <div class="progress-metric"><div class="value">${prs}</div><div class="label">New records</div></div>
+  </div>`);
+}
+
 function renderProgress(app){
   app.appendChild(header("Progress",{back:false}));
   const s=el(`<div class="screen"></div>`);
-
-  // ---- Body weight (independent of workouts) ----
-  s.appendChild(bodyweightCard());
+  s.appendChild(el(`<div class="page-intro"><div class="page-kicker">Training intelligence</div><h2>Proof of the work.</h2><p>Volume, consistency, and strength records in one focused view.</p></div>`));
 
   if(state.workouts.length<1){
-    s.appendChild(el(`<div class="empty" style="padding:32px 20px"><span class="emo">📈</span><h3>No training data yet</h3><div>Log a few workouts to see volume, PRs, and exercise trends.</div></div>`));
+    s.appendChild(bodyweightCard());
+    s.appendChild(el(`<div class="empty" style="padding:32px 20px">${icon("progress","lg")}<h3>No training data yet</h3><div>Log a few workouts to see volume, PRs, and exercise trends.</div></div>`));
     app.appendChild(s); return;
   }
   const hist=[...state.workouts].sort((a,b)=>a.end-b.end);
+  s.appendChild(progressSummaryCard(hist));
 
   // Weekly sets per muscle vs plan
   s.appendChild(muscleSetsCard());
   s.appendChild(strengthRecordsCard());
+  s.appendChild(bodyweightCard());
 
   // Volume per workout (line)
   const volPts=hist.map(w=>({x:w.end, y:workoutVolume(w)}));
@@ -1812,7 +2120,7 @@ function renderProgress(app){
   const holder=el(`<div></div>`);
   const drawEx=()=>{
     const name=sel.value;
-    const pts=hist.map(w=>{ const ex=w.exercises.find(e=>e.name===name); if(!ex)return null;
+    const pts=hist.map(w=>{ const ex=w.exercises.find(e=>sameExercise(e,name)); if(!ex)return null;
       const best=Math.max(...ex.sets.map(s=>epley(s.weight,s.reps))); return {x:w.end,y:best}; }).filter(Boolean).filter(p=>p.y>0);
     holder.innerHTML="";
     if(pts.length<1){ holder.appendChild(el(`<div class="muted" style="padding:20px 0;text-align:center">No data for this exercise.</div>`)); return; }
@@ -1826,11 +2134,13 @@ function renderProgress(app){
   s.appendChild(el(`<div class="section-label">All Exercise Records</div>`));
   const prs=allEx.map(name=>{
     let bestW=0,bestE=0;
-    state.workouts.forEach(w=>w.exercises.filter(e=>e.name===name).forEach(e=>e.sets.forEach(sx=>{
+    state.workouts.forEach(w=>w.exercises.filter(e=>sameExercise(e,name)).forEach(e=>e.sets.forEach(sx=>{
       bestW=Math.max(bestW,Number(sx.weight)||0); bestE=Math.max(bestE,epley(sx.weight,sx.reps)); })));
     return {name,bestW,bestE};
   }).filter(p=>p.bestE>0).sort((a,b)=>b.bestE-a.bestE);
-  prs.forEach(p=> s.appendChild(el(`<div class="card" style="padding:13px 16px"><div class="row"><div class="grow"><div class="title">${esc(p.name)}</div><div class="sub">Top set ${fmtNum(p.bestW)} ${U()}</div></div><div style="text-align:right"><div style="font-weight:800;color:var(--accent)">${fmtNum(p.bestE)}</div><div class="pill">est 1RM</div></div></div></div>`)) );
+  const recordList=el(`<div class="catalog-group"></div>`);
+  prs.forEach(p=> recordList.appendChild(el(`<div class="catalog-row"><div class="catalog-equip">${icon("trophy")}</div><div class="grow"><div class="title">${esc(p.name)}</div><div class="sub">Top set ${fmtNum(p.bestW)} ${U()}</div></div><div style="text-align:right"><div class="record-value">${fmtNum(p.bestE)}</div><div class="pill">est 1RM</div></div></div>`)) );
+  if(prs.length) s.appendChild(recordList);
   app.appendChild(s);
 }
 
@@ -1840,28 +2150,30 @@ function chartCard(title,sub,svg){
 }
 
 /* ---------- SVG line chart ---------- */
+let chartSeq=0;
 function lineChart(pts){
-  const W=480,H=180,padL=8,padR=8,padT=14,padB=22;
+  const W=480,H=190,padL=42,padR=30,padT=20,padB=32;
   if(pts.length===1) pts=[{x:pts[0].x-86400000,y:pts[0].y},pts[0]];
   const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-  const minX=Math.min(...xs),maxX=Math.max(...xs),maxY=Math.max(...ys),minY=Math.min(0,...ys);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),maxY=Math.max(1,...ys),minY=0;
   const sx=x=>padL+((x-minX)/((maxX-minX)||1))*(W-padL-padR);
   const sy=y=>H-padB-((y-minY)/((maxY-minY)||1))*(H-padT-padB);
   let d="",area="";
   pts.forEach((p,i)=>{ const X=sx(p.x),Y=sy(p.y); d+=(i?"L":"M")+X.toFixed(1)+" "+Y.toFixed(1)+" "; });
   area=d+`L ${sx(maxX).toFixed(1)} ${H-padB} L ${sx(minX).toFixed(1)} ${H-padB} Z`;
-  // gridlines
   let grid="";
-  for(let i=0;i<=3;i++){ const gy=padT+i*((H-padT-padB)/3); grid+=`<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="#262d38" stroke-width="1"/>`; }
-  let dots=pts.map(p=>`<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="3" fill="#ff6a3d"/>`).join("");
-  const lastY=pts[pts.length-1].y;
-  const svg=el(`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:180px">
-    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a3d" stop-opacity=".35"/><stop offset="1" stop-color="#ff6a3d" stop-opacity="0"/></linearGradient></defs>
+  [1,.5,0].forEach(frac=>{ const val=maxY*frac, gy=sy(val); grid+=`<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="var(--border)" stroke-width="1"/><text class="chart-label" x="${padL-7}" y="${gy+3}" text-anchor="end">${fmtNum(val).toLocaleString()}</text>`; });
+  let dots=pts.map((p,i)=>`<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="${i===pts.length-1?4:2.5}" fill="var(--accent)"/>`).join("");
+  const last=pts[pts.length-1], grad="forgeLine"+(++chartSeq), startDate=new Date(minX).toLocaleDateString(undefined,{month:"short",day:"numeric"}), endDate=new Date(maxX).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  const svg=el(`<svg class="chart" viewBox="0 0 ${W} ${H}" style="height:190px" role="img" aria-label="Trend from ${esc(startDate)} to ${esc(endDate)}, latest value ${esc(fmtNum(last.y))}">
+    <defs><linearGradient id="${grad}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
     ${grid}
-    <path d="${area}" fill="url(#g1)"/>
-    <path d="${d}" fill="none" stroke="#ff6a3d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="${area}" fill="url(#${grad})"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${dots}
-    <text x="${W-padR}" y="${padT+4}" text-anchor="end" fill="#8b95a5" font-size="11" font-weight="700">${fmtNum(maxY).toLocaleString()}</text>
+    <text class="chart-label" x="${padL}" y="${H-8}" text-anchor="start">${esc(startDate)}</text>
+    <text class="chart-label" x="${W-padR}" y="${H-8}" text-anchor="end">${esc(endDate)}</text>
+    <text class="chart-direct" x="${Math.min(W-padR-4,sx(last.x)-4)}" y="${Math.max(padT+11,sy(last.y)-9)}" text-anchor="end">${fmtNum(last.y).toLocaleString()}</text>
   </svg>`);
   return svg;
 }
@@ -1873,38 +2185,61 @@ function barChart(pts){
   const bw=(W-(pts.length+1)*gap)/pts.length;
   let bars="";
   pts.forEach((p,i)=>{ const x=gap+i*(bw+gap); const h=(p.y/maxY)*(H-padT-padB); const y=H-padB-h;
-    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h,2).toFixed(1)}" rx="5" fill="#ff6a3d"/>`;
-    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" fill="#e8edf4" font-size="11" font-weight="800">${p.y}</text>`;
-    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" fill="#5c6675" font-size="10">${esc(p.label)}</text>`;
+    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h,2).toFixed(1)}" rx="5" fill="var(--accent)"/>`;
+    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" fill="var(--text)" font-size="11" font-weight="800">${p.y}</text>`;
+    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" fill="var(--faint)" font-size="10">${esc(p.label)}</text>`;
   });
-  return el(`<svg class="chart" viewBox="0 0 ${W} ${H}" style="height:170px">${bars}</svg>`);
+  return el(`<svg class="chart" viewBox="0 0 ${W} ${H}" style="height:170px" role="img" aria-label="Bar chart with ${pts.length} periods; highest value ${maxY}">${bars}</svg>`);
 }
 
 /* ============================================================
    ROUTINES
    ============================================================ */
+function routinePrescription(r){ if(/\(His · Mass\)$/.test(r.name)) return "his"; if(/\(Hers · Tone\)$/.test(r.name)) return "hers"; return null; }
+function routineBaseName(r){ return r.name.replace(/\s*\((?:His · Mass|Hers · Tone)\)$/,"" ).trim(); }
+function groupedRoutines(){
+  const groups=[], byBase=new Map();
+  state.routines.forEach(r=>{
+    const prescription=routinePrescription(r);
+    if(!prescription){ groups.push({key:"single:"+r.id,base:r.name,single:r}); return; }
+    const base=routineBaseName(r); let g=byBase.get(base);
+    if(!g){ g={key:"paired:"+base,base,his:null,hers:null}; byBase.set(base,g); groups.push(g); }
+    g[prescription]=r;
+  });
+  return groups;
+}
+function selectedRoutine(group){ const v=state.settings.planVariant||"his"; return group.single||group[v]||group.his||group.hers; }
+function routineMinutes(r){ const sets=r.exercises.reduce((n,e)=>n+(Number(e.sets)||1),0); return Math.max(20,Math.round((sets*2.1+r.exercises.length*1.5)/5)*5); }
+function routineMuscles(r){ return [...new Set(r.exercises.map(e=>e.muscle).filter(Boolean))]; }
+function equipmentIconName(eq){ return eq==="dumbbell"?"dumbbell":eq==="bodyweight"?"body":eq==="pullup"?"body":"equipment"; }
+function routineEquipment(r){
+  const kinds=new Set(); r.exercises.forEach(re=>{ const mapped=r.bodyweight?re.name:mapExerciseForMode(re.name,equipMode()); const ex=exerciseByRef(mapped); if(ex&&ex.equipment) kinds.add(ex.equipment); });
+  return [...kinds];
+}
 function renderRoutines(app){
-  const add=el(`<button class="iconbtn accentbtn" style="background:var(--accent);color:#1a0e08">＋ New</button>`);
+  const add=el(`<button class="iconbtn accentbtn" aria-label="Create new routine" style="background:var(--accent);color:#21130b">${icon("plus","sm")}<span>New</span></button>`);
   add.onclick=()=>go("routine-edit",{id:null});
   app.appendChild(header("Routines",{back:false,right:add}));
   const s=el(`<div class="screen"></div>`);
-  s.appendChild(el(`<div class="section-label" style="margin-top:4px">Equipment mode · applies when you start</div>`));
-  s.appendChild(equipModeSeg());
+  const groups=groupedRoutines();
+  s.appendChild(el(`<div class="page-intro"><div class="page-kicker">Program library</div><h2>Choose the work.</h2><p>${groups.length} routines · prescriptions are paired into one clean catalog.</p></div>`));
+  const setup=el(`<div class="row" style="margin:0 2px 15px"><div class="grow"><div class="title" style="font-size:13px">Current setup</div><div class="sub">Applied when a routine starts</div></div></div>`); setup.appendChild(workoutSetupControl()); s.appendChild(setup);
   if(!state.routines.length){
-    s.appendChild(el(`<div class="empty"><span class="emo">📋</span><h3>No routines yet</h3><div>Build a reusable routine and start it with one tap.</div></div>`));
-    const b=el(`<button class="btn primary">＋ Create Routine</button>`); b.onclick=()=>go("routine-edit",{id:null}); s.appendChild(b);
+    s.appendChild(el(`<div class="empty">${icon("routines","lg")}<h3>No routines yet</h3><div>Build a reusable routine and start it with one tap.</div></div>`));
+    const b=el(`<button class="btn primary">${icon("plus")}<span>Create Routine</span></button>`); b.onclick=()=>go("routine-edit",{id:null}); s.appendChild(b);
     app.appendChild(s); return;
   }
-  state.routines.forEach(r=>{
-    const c=el(`<div class="card"></div>`);
-    const top=el(`<div class="row" style="cursor:pointer"><div class="grow"><div class="title">${esc(r.name)}</div><div class="sub">${r.exercises.length} exercises · tap to view</div></div><span class="chev" style="font-size:13px;color:var(--faint);transition:.15s">▼</span></div>`);
-    const details=el(`<div style="display:none;margin-top:8px"></div>`);
+  groups.forEach(group=>{
+    const r=selectedRoutine(group), paired=!!(group.his||group.hers), muscles=routineMuscles(r), equipment=routineEquipment(r);
+    const c=el(`<div class="card routine-card"></div>`);
+    const top=el(`<div class="routine-main" role="button" tabindex="0" aria-expanded="false"><div class="row"><div class="grow"><div class="routine-name">${esc(group.base)}</div><div class="routine-meta"><span>${icon("clock","sm")}${routineMinutes(r)} min</span><span>${r.exercises.length} exercises</span>${equipment.map(eq=>`<span>${icon(equipmentIconName(eq),"sm")}${esc(EQUIP_SHORT[eq]||eq)}</span>`).join("")}</div></div><span class="chev" style="color:var(--faint);transition:.15s">${icon("chevronDown","sm")}</span></div><div class="muscle-chips">${muscles.slice(0,5).map(m=>`<span class="chip">${esc(m)}</span>`).join("")}${paired?`<span class="chip accent">${esc(variantLabel().split(" · ")[0])} prescription</span>`:""}</div></div>`);
+    const details=el(`<div class="routine-details" style="display:none"></div>`);
     r.exercises.forEach(re=>{
       // show what this slot resolves to under the current equipment mode
       const mapped = r.bodyweight ? re.name : mapExerciseForMode(re.name, equipMode());
-      const lib = state.exercises.find(x=>x.name===mapped);
+      const lib = exerciseByRef(mapped);
       const eq = lib&&lib.equipment ? `<span class="cat-tag" style="flex:0 0 auto">${EQUIP_SHORT[lib.equipment]||""}</span>` : "";
-      const erow=el(`<div class="row" style="padding:8px 0;border-top:1px solid var(--border)"></div>`);
+      const erow=el(`<div class="row" style="padding:9px 0"></div>`);
       erow.appendChild(infoBtn(mapped));
       erow.appendChild(el(`<div class="grow" style="font-weight:600;font-size:14px;min-width:0">${esc(mapped)}${mapped!==re.name?` <span class="pill" style="font-size:11px">↷</span>`:""}</div>`));
       if(eq) erow.appendChild(el(eq));
@@ -1913,11 +2248,12 @@ function renderRoutines(app){
     });
     top.onclick=()=>{ const open=details.style.display!=="none";
       details.style.display=open?"none":"block";
-      top.querySelector(".chev").style.transform=open?"":"rotate(180deg)"; };
+      top.setAttribute("aria-expanded",String(!open)); top.querySelector(".chev").style.transform=open?"":"rotate(180deg)"; };
+    top.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();top.click();}};
     c.appendChild(top); c.appendChild(details);
-    const row=el(`<div class="btn-row" style="margin-top:12px"></div>`);
-    const startB=el(`<button class="btn primary sm">▶ Start</button>`); startB.style.flex="2"; startB.onclick=()=>startFromRoutine(r.id);
-    const editB=el(`<button class="btn ghost sm">Edit</button>`); editB.onclick=()=>go("routine-edit",{id:r.id});
+    const row=el(`<div class="routine-actions"></div>`);
+    const startB=el(`<button class="btn primary sm">${icon("play","sm")}<span>Start</span></button>`); startB.style.flex="2"; startB.onclick=()=>startFromRoutine(r.id);
+    const editB=el(`<button class="btn ghost sm">${icon("edit","sm")}<span>Edit</span></button>`); editB.onclick=()=>go("routine-edit",{id:r.id});
     row.appendChild(startB); row.appendChild(editB); c.appendChild(row); s.appendChild(c);
   });
   app.appendChild(s);
@@ -1946,9 +2282,9 @@ function renderRoutineEdit(app,v){
       const c=el(`<div class="card" style="padding:12px 14px;margin-bottom:8px"></div>`);
       const r=el(`<div class="row"><div class="grow"><div class="title">${esc(ex.name)}</div><div class="sub">${esc(ex.muscle||"")}</div></div></div>`);
       const stepper=el(`<div class="row" style="gap:6px"></div>`);
-      const minus=el(`<button class="iconbtn" style="width:32px;height:32px;font-size:18px">−</button>`);
+      const minus=el(`<button class="iconbtn" aria-label="Decrease sets for ${esc(ex.name)}" style="width:32px;height:32px;font-size:18px">−</button>`);
       const cnt=el(`<span style="min-width:54px;text-align:center;font-weight:700">${ex.sets} set${ex.sets!==1?"s":""}</span>`);
-      const plus=el(`<button class="iconbtn" style="width:32px;height:32px;font-size:18px">＋</button>`);
+      const plus=el(`<button class="iconbtn" aria-label="Increase sets for ${esc(ex.name)}" style="width:32px;height:32px">${icon("plus","sm")}</button>`);
       minus.onclick=()=>{ ex.sets=Math.max(1,ex.sets-1); drawList(); };
       plus.onclick=()=>{ ex.sets=Math.min(15,ex.sets+1); drawList(); };
       stepper.appendChild(minus); stepper.appendChild(cnt); stepper.appendChild(plus);
@@ -1964,8 +2300,8 @@ function renderRoutineEdit(app,v){
       c.appendChild(cueIn);
 
       const ctl=el(`<div class="row" style="margin-top:8px;gap:8px"></div>`);
-      const up=el(`<button class="btn ghost sm" style="flex:1">↑</button>`); up.onclick=()=>{ if(i>0){[draft.exercises[i-1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i-1]]; drawList();} };
-      const dn=el(`<button class="btn ghost sm" style="flex:1">↓</button>`); dn.onclick=()=>{ if(i<draft.exercises.length-1){[draft.exercises[i+1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i+1]]; drawList();} };
+      const up=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} up" style="flex:1">↑</button>`); up.onclick=()=>{ if(i>0){[draft.exercises[i-1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i-1]]; drawList();} };
+      const dn=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} down" style="flex:1">↓</button>`); dn.onclick=()=>{ if(i<draft.exercises.length-1){[draft.exercises[i+1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i+1]]; drawList();} };
       const rm=el(`<button class="btn danger sm" style="flex:1">Remove</button>`); rm.onclick=()=>{ draft.exercises.splice(i,1); drawList(); };
       ctl.appendChild(up); ctl.appendChild(dn); ctl.appendChild(rm); c.appendChild(ctl);
       list.appendChild(c);
@@ -1973,12 +2309,12 @@ function renderRoutineEdit(app,v){
   }
   drawList();
 
-  const addEx=el(`<button class="btn ghost" style="margin-bottom:14px">＋ Add Exercise</button>`);
-  addEx.onclick=()=>openPicker(sel=>{ sel.forEach(e=>draft.exercises.push({name:e.name,muscle:e.muscle,sets:3})); drawList(); });
+  const addEx=el(`<button class="btn ghost" style="margin-bottom:14px">${icon("plus")}<span>Add Exercise</span></button>`);
+  addEx.onclick=()=>openPicker(sel=>{ sel.forEach(e=>draft.exercises.push(attachExerciseRef({name:e.name,muscle:e.muscle,sets:3},e.name))); drawList(); });
   s.appendChild(addEx);
 
   s.appendChild(el(`<hr class="hr"/>`));
-  const saveB=el(`<button class="btn primary" style="margin-bottom:10px">✓ Save Routine</button>`);
+  const saveB=el(`<button class="btn primary" style="margin-bottom:10px">${icon("check")}<span>Save Routine</span></button>`);
   saveB.onclick=()=>{
     if(!draft.name.trim()){ toast("Give your routine a name"); nameInput.focus(); return; }
     if(!draft.exercises.length){ toast("Add at least one exercise"); return; }
@@ -1998,30 +2334,43 @@ function renderRoutineEdit(app,v){
    EXERCISE INFO (how-to sheet)
    ============================================================ */
 function infoBtn(name){
-  const b=el(`<button class="infobtn" aria-label="How to do ${esc(name)}">?</button>`);
+  const b=el(`<button class="infobtn" aria-label="How to do ${esc(name)}">${icon("info","sm")}</button>`);
   b.onclick=(e)=>{ e.stopPropagation(); openExerciseInfo(name); };
   return b;
 }
 function openExerciseInfo(name){
-  const ex=state.exercises.find(x=>x.name===name);
+  name=canonicalExerciseName(name);
+  const ex=exerciseByRef(name);
   const info=(typeof EXERCISE_INFO!=="undefined" && EXERCISE_INFO[name]) || null;
   openSheet(name, body=>{
     const chips=el(`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>`);
     if(ex&&ex.muscle) chips.appendChild(el(`<span class="chip accent">${esc(ex.muscle)}</span>`));
     if(ex&&ex.equipment) chips.appendChild(el(`<span class="chip">${esc(EQUIP_LABELS[ex.equipment]||ex.equipment)}</span>`));
     const pl=patternLabel(name); if(pl) chips.appendChild(el(`<span class="chip">${esc(pl)}</span>`));
+    if(ex&&ex.difficulty) chips.appendChild(el(`<span class="chip">${esc(ex.difficulty[0].toUpperCase()+ex.difficulty.slice(1))}</span>`));
     body.appendChild(chips);
     if(info){
-      if(info.s){ body.appendChild(el(`<div class="section-label" style="margin:6px 0 6px">Setup</div>`));
+      if(info.c&&info.c.length){ body.appendChild(el(`<div class="section-label" style="margin:6px 0 6px">Quick form check</div>`));
+        const ul=el(`<ul class="ex-cues" style="background:var(--accent-dim);border:1px solid rgba(255,106,61,.28);border-radius:12px;padding:10px 12px 10px 30px"></ul>`); info.c.slice(0,3).forEach(t=>ul.appendChild(el(`<li>${esc(t)}</li>`))); body.appendChild(ul); }
+      if(info.s){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Setup</div>`));
         body.appendChild(el(`<div class="ex-desc">${esc(info.s)}</div>`)); }
       if(info.m&&info.m.length){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">The motion</div>`));
         const ol=el(`<ol class="ex-steps"></ol>`); info.m.forEach(t=>ol.appendChild(el(`<li>${esc(t)}</li>`))); body.appendChild(ol); }
-      if(info.c&&info.c.length){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Cues & mistakes</div>`));
-        const ul=el(`<ul class="ex-cues"></ul>`); info.c.forEach(t=>ul.appendChild(el(`<li>${esc(t)}</li>`))); body.appendChild(ul); }
     } else if(ex&&ex.desc){
       body.appendChild(el(`<div class="ex-desc">${esc(ex.desc)}</div>`));
     } else {
       body.appendChild(el(`<div class="muted" style="padding:4px 0 6px">No description for this exercise yet.</div>`));
+    }
+    if(ex&&ex.feel){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">What you should feel</div>`));
+      body.appendChild(el(`<div class="ex-desc">${esc(ex.feel)}</div>`)); }
+    if(ex&&ex.safety){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Safety & setup</div>`));
+      body.appendChild(el(`<div class="note-banner" style="margin-bottom:0">${esc(ex.safety)}</div>`)); }
+    if(ex&&ex.requirements&&ex.requirements.length){ body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Required setup</div>`));
+      const req=el(`<div style="display:flex;gap:6px;flex-wrap:wrap"></div>`); ex.requirements.forEach(x=>req.appendChild(el(`<span class="chip">${esc(x)}</span>`))); body.appendChild(req); }
+    if(ex&&((ex.regressions&&ex.regressions.length)||(ex.progressions&&ex.progressions.length))){
+      body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Scale the movement</div>`));
+      if(ex.regressions&&ex.regressions.length) body.appendChild(el(`<div class="ex-desc"><b>Make it easier:</b> ${esc(ex.regressions.join(" · "))}</div>`));
+      if(ex.progressions&&ex.progressions.length) body.appendChild(el(`<div class="ex-desc" style="margin-top:5px"><b>Progress:</b> ${esc(ex.progressions.join(" · "))}</div>`));
     }
     if(ex&&ex.custom){
       body.appendChild(el(`<div class="section-label" style="margin:14px 0 6px">Your how-to notes</div>`));
@@ -2060,8 +2409,8 @@ function equipChipRow(initial, onPick){
   const row=el(`<div class="eqchips"></div>`);
   [["all","All"],["barbell","Barbell"],["dumbbell","Dumbbell"],["bodyweight","Bodyweight"],["pullup","Pull-up bar"],["gym","Gym"]]
     .forEach(([v,l])=>{
-      const b=el(`<button class="eqchip ${initial===v?"on":""}">${l}</button>`);
-      b.onclick=()=>{ row.querySelectorAll(".eqchip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); onPick(v); };
+      const b=el(`<button class="eqchip ${initial===v?"on":""}" aria-pressed="${initial===v}">${l}</button>`);
+      b.onclick=()=>{ row.querySelectorAll(".eqchip").forEach(x=>{x.classList.remove("on");x.setAttribute("aria-pressed","false");}); b.classList.add("on");b.setAttribute("aria-pressed","true");onPick(v); };
       row.appendChild(b);
     });
   return row;
@@ -2075,7 +2424,7 @@ function openPicker(onDone){
     const search=el(`<input class="search" placeholder="Search exercises…" autocomplete="off"/>`);
     body.appendChild(search);
     body.appendChild(equipChipRow(eqFilter, v=>{ eqFilter=v; draw(); }));
-    const newBtn=el(`<button class="btn ghost sm" style="width:100%;margin-bottom:10px">＋ Create custom exercise</button>`);
+    const newBtn=el(`<button class="btn ghost sm" style="width:100%;margin-bottom:10px">${icon("plus","sm")}<span>Create custom exercise</span></button>`);
     newBtn.onclick=()=>createCustomExercise(()=>draw());
     body.appendChild(newBtn);
     const listWrap=el(`<div></div>`); body.appendChild(listWrap);
@@ -2110,12 +2459,17 @@ function openPicker(onDone){
 function createCustomExercise(done){
   openSheet("Custom Exercise", body=>{
     const nf=el(`<div class="field"><label>Name</label><input class="input" placeholder="Exercise name"/></div>`);
-    const mf=el(`<div class="field"><label>Muscle group</label><select class="input">${["Chest","Back","Legs","Shoulders","Arms","Core","Cardio","Other"].map(m=>`<option>${m}</option>`).join("")}</select></div>`);
+    const mf=el(`<div class="field"><label>Primary muscle group</label><select class="input">${["Chest","Back","Legs","Shoulders","Arms","Core","Cardio","Mobility","Other"].map(m=>`<option>${m}</option>`).join("")}</select></div>`);
+    const ef=el(`<div class="field"><label>Equipment</label><select class="input"><option value="bodyweight">Bodyweight</option><option value="dumbbell">Dumbbells</option><option value="barbell">Barbell</option><option value="pullup">Pull-up bar</option><option value="gym">Gym equipment</option></select></div>`);
+    const pf=el(`<div class="field"><label>Movement pattern</label><select class="input"><option value="">Unassigned</option>${Object.entries(MOVEMENT_POOLS).map(([k,p])=>`<option value="${esc(k)}">${esc(p.label)}</option>`).join("")}</select></div>`);
+    const lf=el(`<div class="field"><label>Difficulty</label><select class="input"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>`);
     const df=el(`<div class="field"><label>How to do it (optional)</label><textarea class="input" rows="3" placeholder="Setup, motion, cues…" style="resize:vertical;font-family:inherit"></textarea></div>`);
-    body.appendChild(nf); body.appendChild(mf); body.appendChild(df);
+    body.appendChild(nf); body.appendChild(mf); body.appendChild(ef); body.appendChild(pf); body.appendChild(lf); body.appendChild(df);
     const b=el(`<button class="btn primary">Add Exercise</button>`);
     b.onclick=()=>{ const name=$("input",nf).value.trim(); if(!name){toast("Enter a name");return;}
-      const ex={id:uid(),name,muscle:$("select",mf).value,custom:true,desc:$("textarea",df).value.trim()};
+      if(exerciseByRef(name)){ toast("That exercise already exists"); return; }
+      const ex={id:uid(),name,muscle:$("select",mf).value,equipment:$("select",ef).value,pattern:$("select",pf).value||null,difficulty:$("select",lf).value,custom:true,desc:$("textarea",df).value.trim()}; ex.key="custom:"+ex.id;
+      Object.assign(ex,metadataFor(ex.name,ex.muscle,ex.equipment,ex.pattern),{key:ex.key,difficulty:ex.difficulty});
       state.exercises.push(ex); save("exercises"); closeSheet(); done&&done(); toast("Exercise added"); };
     body.appendChild(b);
   });
@@ -2125,22 +2479,57 @@ function createCustomExercise(done){
 function renderExerciseLibrary(app){
   app.appendChild(header("Exercise Library"));
   const s=el(`<div class="screen"></div>`);
-  const add=el(`<button class="btn ghost" style="margin-bottom:14px">＋ Create custom exercise</button>`);
+  s.appendChild(el(`<div class="page-intro"><div class="page-kicker">Movement catalog</div><h2>Find the right motion.</h2><p>Search by goal, setup, muscle, or equipment.</p></div>`));
+  let query="",equipment="all",muscle="all",pattern="all",difficulty="all",groupBy="muscle",favoritesOnly=false,recentOnly=false;
+  const recentKeys=new Set();
+  state.workouts.slice().sort((a,b)=>b.end-a.end).forEach(w=>w.exercises.forEach(e=>{ if(recentKeys.size<20) recentKeys.add(exerciseKeyOf(e)); }));
+  const controls=el(`<div style="position:sticky;top:58px;z-index:20;background:linear-gradient(180deg,var(--bg) 88%,transparent);padding-bottom:10px"></div>`);
+  const search=el(`<input class="search" placeholder="Search name, muscle, pattern, or setup…" autocomplete="off"/>`); controls.appendChild(search);
+  controls.appendChild(equipChipRow(equipment,v=>{equipment=v;draw();}));
+  const grid=el(`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"></div>`);
+  const muscleSel=el(`<select class="input" aria-label="Filter by muscle"><option value="all">All muscles</option>${[...new Set(state.exercises.map(e=>e.muscle))].sort().map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("")}</select>`);
+  const patternSel=el(`<select class="input" aria-label="Filter by movement pattern"><option value="all">All patterns</option>${Object.entries(MOVEMENT_POOLS).map(([k,p])=>`<option value="${esc(k)}">${esc(p.label)}</option>`).join("")}</select>`);
+  const difficultySel=el(`<select class="input" aria-label="Filter by difficulty"><option value="all">All levels</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>`);
+  const groupSel=el(`<select class="input" aria-label="Group exercises"><option value="muscle">Group by muscle</option><option value="pattern">Group by pattern</option><option value="none">A–Z list</option></select>`);
+  [muscleSel,patternSel,difficultySel,groupSel].forEach(x=>grid.appendChild(x)); controls.appendChild(grid);
+  const quick=el(`<div class="eqchips" style="margin-bottom:0"></div>`);
+  const favFilter=el(`<button class="eqchip" aria-pressed="false">${icon("star","sm")} Favorites</button>`), recentFilter=el(`<button class="eqchip" aria-pressed="false">${icon("history","sm")} Recently used</button>`);
+  favFilter.onclick=()=>{favoritesOnly=!favoritesOnly;favFilter.classList.toggle("on",favoritesOnly);favFilter.setAttribute("aria-pressed",String(favoritesOnly));draw();};
+  recentFilter.onclick=()=>{recentOnly=!recentOnly;recentFilter.classList.toggle("on",recentOnly);recentFilter.setAttribute("aria-pressed",String(recentOnly));draw();};
+  quick.appendChild(favFilter);quick.appendChild(recentFilter);controls.appendChild(quick);s.appendChild(controls);
+  const add=el(`<button class="btn ghost" style="margin-bottom:10px">${icon("plus")}<span>Create custom exercise</span></button>`);
   add.onclick=()=>createCustomExercise(render); s.appendChild(add);
-  const groups={};
-  state.exercises.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(e=>(groups[e.muscle]=groups[e.muscle]||[]).push(e));
-  Object.keys(groups).sort().forEach(mg=>{
-    s.appendChild(el(`<div class="section-label">${esc(mg)}</div>`));
-    groups[mg].forEach(e=>{
-      const c=el(`<div class="card" style="padding:12px 14px;margin-bottom:6px"><div class="row"><div class="grow"><div class="title">${esc(e.name)}</div></div>${e.custom?'<span class="cat-tag right">custom</span>':''}</div></div>`);
-      c.querySelector(".row").insertBefore(infoBtn(e.name), c.querySelector(".row").firstChild);
-      if(e.custom){ c.querySelector(".row").style.cursor="pointer";
-        const d=el(`<button class="iconbtn" style="width:32px;height:32px;font-size:14px;margin-left:8px">🗑</button>`);
-        d.onclick=()=>{ if(confirmAct("Delete this custom exercise?")){ state.exercises=state.exercises.filter(x=>x.id!==e.id); save("exercises"); render(); } };
-        c.querySelector(".row").appendChild(d); }
-      s.appendChild(c);
+  const summary=el(`<div class="catalog-summary" aria-live="polite"></div>`);s.appendChild(summary);
+  const results=el(`<div></div>`);s.appendChild(results);
+  function draw(){
+    const q=query.trim().toLowerCase();
+    const filtered=state.exercises.filter(e=>{
+      const pool=e.pattern&&MOVEMENT_POOLS[e.pattern], hay=[e.name,e.muscle,pool&&pool.label,e.difficulty,...(e.requirements||[]),...(e.secondaryMuscles||[])].filter(Boolean).join(" ").toLowerCase();
+      return (!q||hay.includes(q))&&(equipment==="all"||e.equipment===equipment)&&(muscle==="all"||e.muscle===muscle)&&
+        (pattern==="all"||e.pattern===pattern)&&(difficulty==="all"||e.difficulty===difficulty)&&(!favoritesOnly||e.favorite)&&(!recentOnly||recentKeys.has(exerciseKeyOf(e)));
+    }).sort((a,b)=>a.name.localeCompare(b.name));
+    summary.textContent=`${filtered.length} movement${filtered.length!==1?"s":""} shown`;
+    const groups={}; filtered.forEach(e=>{ const k=groupBy==="muscle"?(e.muscle||"Other"):groupBy==="pattern"?(patternLabel(e.name)||"Unassigned"):"Exercises"; (groups[k]=groups[k]||[]).push(e); });
+    results.innerHTML="";
+    Object.keys(groups).sort().forEach(label=>{
+      if(groupBy!=="none") results.appendChild(el(`<div class="section-label">${esc(label)}</div>`));
+      const group=el(`<div class="catalog-group"></div>`);
+      groups[label].forEach(e=>{
+        const c=el(`<div class="catalog-row"><div class="grow"><div class="title">${esc(e.name)}</div><div class="sub">${esc(EQUIP_LABELS[e.equipment]||"Custom setup")} · ${esc(e.difficulty||"Unrated")}${e.unilateral?" · unilateral":""}</div></div>${e.custom?'<span class="cat-tag">custom</span>':''}</div>`);
+        const row=c;row.insertBefore(infoBtn(e.name),row.querySelector(".grow"));
+        const fav=el(`<button class="iconbtn" aria-label="${e.favorite?"Remove from":"Add to"} favorites" style="width:34px;height:34px;margin-left:3px;color:${e.favorite?"var(--accent-2)":"var(--faint)"}">${icon("star","sm")}</button>`);
+        fav.onclick=()=>{e.favorite=!e.favorite;save("exercises");draw();};row.appendChild(fav);
+        if(e.custom){ const d=el(`<button class="iconbtn" aria-label="Delete ${esc(e.name)}" style="width:34px;height:34px;margin-left:4px">${icon("trash","sm")}</button>`);
+          d.onclick=()=>{ if(confirmAct("Delete this custom exercise?")){state.exercises=state.exercises.filter(x=>x.id!==e.id);save("exercises");draw();} };row.appendChild(d); }
+        group.appendChild(c);
+      });
+      results.appendChild(group);
     });
-  });
+    if(!filtered.length) results.appendChild(el(`<div class="empty" style="padding:30px 18px"><h3>No matching exercises</h3><div>Clear a filter or create a custom movement.</div></div>`));
+  }
+  search.oninput=()=>{query=search.value;draw();};
+  muscleSel.onchange=()=>{muscle=muscleSel.value;draw();}; patternSel.onchange=()=>{pattern=patternSel.value;draw();};
+  difficultySel.onchange=()=>{difficulty=difficultySel.value;draw();}; groupSel.onchange=()=>{groupBy=groupSel.value;draw();}; draw();
   app.appendChild(s);
 }
 
@@ -2237,7 +2626,7 @@ function renderSettings(app){
   }
   bCard.appendChild(brow);
   if(connected){
-    const restoreB=el(`<button class="btn ghost sm" style="width:100%;margin-top:8px">⤵︎ Restore from backup (replace this device)</button>`);
+    const restoreB=el(`<button class="btn ghost sm" style="width:100%;margin-top:8px">${icon("download","sm")}<span>Restore from backup (replace this device)</span></button>`);
     restoreB.onclick=()=>forceRestore();
     bCard.appendChild(restoreB);
   }
@@ -2245,13 +2634,13 @@ function renderSettings(app){
 
   // data
   s.appendChild(el(`<div class="section-label">Data</div>`));
-  const exp=el(`<button class="btn ghost" style="margin-bottom:10px">⬇ Export data (backup)</button>`);
+  const exp=el(`<button class="btn ghost" style="margin-bottom:10px">${icon("download")}<span>Export data (backup)</span></button>`);
   exp.onclick=exportData; s.appendChild(exp);
-  const imp=el(`<button class="btn ghost" style="margin-bottom:10px">⬆ Import data</button>`);
+  const imp=el(`<button class="btn ghost" style="margin-bottom:10px">${icon("upload")}<span>Import data</span></button>`);
   imp.onclick=importData; s.appendChild(imp);
   const reset=el(`<button class="btn danger">Erase all data</button>`);
   reset.onclick=()=>{ if(confirmAct("Erase ALL workouts, routines, and custom exercises? This cannot be undone.")){
-    ["settings","exercises","routines","workouts","active","plan","bodyweights","deleted","seed_v1","seed_bw","updatedAt","lastBackup"].forEach(k=>localStorage.removeItem("forge_"+k));
+    ["settings","exercises","routines","workouts","active","plan","bodyweights","deleted","seed_v1","seed_bw","seed_v2","seed_v3","seed_v4b","updatedAt","lastBackup"].forEach(k=>localStorage.removeItem("forge_"+k));
     location.reload(); } };
   s.appendChild(reset);
 
@@ -2285,21 +2674,33 @@ async function forceRestore(){
 }
 
 function exportData(){
-  const data={version:1, exported:Date.now(), settings:state.settings, exercises:state.exercises, routines:state.routines, workouts:state.workouts, plan:state.plan, bodyweights:state.bodyweights, deleted:state.deleted};
+  const data={version:DATA_VERSION, exported:Date.now(), settings:state.settings, exercises:state.exercises, routines:state.routines, workouts:state.workouts, plan:state.plan, bodyweights:state.bodyweights, deleted:state.deleted};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   a.download=`forge-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast("Backup downloaded");
 }
+function validateBackupData(d){
+  if(!d||typeof d!=="object"||Array.isArray(d)) return "Backup is not a JSON object";
+  if(d.version!==undefined&&!Number.isFinite(Number(d.version))) return "Backup format version is invalid";
+  if(Number(d.version||1)>DATA_VERSION) return `Backup format v${d.version} is newer than this Forge version`;
+  const recognized=["settings","exercises","routines","workouts","plan","bodyweights","deleted"];
+  if(!recognized.some(k=>Object.prototype.hasOwnProperty.call(d,k))) return "No Forge data found in this file";
+  for(const k of ["exercises","routines","workouts","bodyweights","deleted"]){ if(d[k]!==undefined&&!Array.isArray(d[k])) return `${k} must be a list`; }
+  for(const k of ["settings","plan"]){ if(d[k]!==undefined&&(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))) return `${k} must be an object`; }
+  return "";
+}
 function importData(){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
   inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const r=new FileReader();
-    r.onload=()=>{ try{ const d=JSON.parse(r.result);
+    r.onload=()=>{ try{ const d=JSON.parse(r.result), invalid=validateBackupData(d); if(invalid){toast(invalid);return;}
       if(!confirmAct("Import this backup? It will REPLACE your current data.")) return;
       if(d.settings)state.settings=d.settings; if(d.exercises)state.exercises=d.exercises;
       if(d.routines)state.routines=d.routines; if(d.workouts)state.workouts=d.workouts;
       if(d.plan)state.plan=d.plan; if(d.bodyweights)state.bodyweights=d.bodyweights;
       if(d.deleted)state.deleted=d.deleted;
+      state.active=null; DB.set("active",null); stopTimer(); stopRest();
+      migrateExerciseData(); seedData();
       ["settings","exercises","routines","workouts","plan","bodyweights","deleted"].forEach(save); render(); toast("Data imported");
     }catch(e){ toast("Invalid backup file"); } };
     r.readAsText(f); };
@@ -2315,7 +2716,7 @@ function openSheet(title, build){
   const sheet=el(`<div class="sheet"></div>`);
   sheet.appendChild(el(`<div class="grab"></div>`));
   const head=el(`<div class="sheet-head"><h3>${esc(title)}</h3></div>`);
-  const close=el(`<button class="iconbtn" style="background:var(--surface-2)">✕</button>`); close.onclick=closeSheet; head.appendChild(close);
+  const close=el(`<button class="iconbtn" aria-label="Close" style="background:var(--surface-2)">✕</button>`); close.onclick=closeSheet; head.appendChild(close);
   sheet.appendChild(head);
   const body=el(`<div class="sheet-body"></div>`); sheet.appendChild(body);
   bg.appendChild(sheet);
