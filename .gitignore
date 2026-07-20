@@ -1,0 +1,10 @@
+# Personal, live workout history written by the local sync server
+data/
+
+# Local runtime output
+*.log
+.server.log
+
+# Editor metadata
+.claude/
+.DS_Store
