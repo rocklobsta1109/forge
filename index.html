@@ -372,6 +372,14 @@
   .confirm-msg{font-size:15px;line-height:1.5;color:var(--text);margin:-4px 0 16px;white-space:pre-line;}
   .btn.danger-solid{background:var(--danger);color:#2a0b0e;border-color:var(--danger);}
   .confirm-actions .btn{margin-bottom:8px;}
+  /* ---------- Home: greeting in the header, one primary, compact secondary row ---------- */
+  .brand-title .greet{letter-spacing:-.2px;text-transform:none;font-size:18px;font-weight:800;}
+  .quick-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -14px 6px;padding:2px 14px 8px;}
+  .quick-row::-webkit-scrollbar{display:none;}
+  .qchip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:9px 14px;border-radius:12px;
+    border:1px solid var(--hairline);background:var(--surface-2);color:var(--text);font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap;transition:.12s;}
+  .qchip .icon{width:16px;height:16px;color:var(--accent-2);}
+  .qchip:active{transform:scale(.96);background:var(--surface-3);}
   :focus-visible{outline:2px solid var(--accent-2)!important;outline-offset:2px}
   .iconbtn,.infobtn,.checkbtn,.eqchip,.nav button{min-width:42px;min-height:42px}
   @media(max-width:580px){.generator-row{display:grid;grid-template-columns:24px 42px minmax(0,1fr) 42px;gap:8px 9px}.generator-row .order{grid-column:1;grid-row:1}.generator-row .infobtn{grid-column:2;grid-row:1}.generator-row .grow{grid-column:3;grid-row:1}.generator-row .swap-mini{grid-column:4;grid-row:1}.generator-row .cat-tag{grid-column:2;grid-row:2;justify-self:center}.generator-row .pill{grid-column:3/5;grid-row:2;justify-self:start}}
@@ -1572,7 +1580,8 @@ function header(title, opts={}){
   const showBack = opts.back ?? (stack.length>1);
   const h = el(`<div class="topbar"></div>`);
   if(showBack){ const b=el(`<button class="iconbtn" aria-label="${esc(opts.backLabel||"Back")}">${icon(opts.backIcon||"chevronLeft","lg")}</button>`); b.onclick=opts.onBack||back; h.appendChild(b); }
-  if(title==="Forge") h.appendChild(el(`<h1 class="brand-title"><span class="brand-mark">${icon("forge")}</span><span>Forge</span></h1>`));
+  if(opts.brand) h.appendChild(el(`<h1 class="brand-title"><span class="brand-mark">${icon("forge")}</span><span class="greet">${esc(title)}</span></h1>`));
+  else if(title==="Forge") h.appendChild(el(`<h1 class="brand-title"><span class="brand-mark">${icon("forge")}</span><span>Forge</span></h1>`));
   else h.appendChild(el(`<h1>${esc(title)}</h1>`));
   if(opts.right) h.appendChild(opts.right);
   return h;
@@ -1686,40 +1695,18 @@ function renderGenerator(app){
 }
 
 function renderHome(app){
-  app.appendChild(header("Forge", {back:false, right:(()=>{const b=el(`<button class="iconbtn" aria-label="Settings">${icon("settings")}</button>`);b.onclick=()=>go("settings");return b;})()}));
+  // greeting lives in the header so today's plan is the first thing on screen
+  app.appendChild(header(greeting(), {back:false, brand:true, right:(()=>{const b=el(`<button class="iconbtn" aria-label="Settings">${icon("settings")}</button>`);b.onclick=()=>go("settings");return b;})()}));
   const s = el(`<div class="screen"></div>`);
 
-  // hero stats
-  const now = Date.now();
-  const weekAgo = now - 7*86400000;
-  const thisWeek = state.workouts.filter(w=>w.end>=weekAgo).length;
-  const total = state.workouts.length;
-  const streak = computeStreak();
-
-  s.appendChild(el(`<div class="home-greeting"><div class="page-kicker">Training dashboard</div><h2>${greeting()}</h2><p>${total?`${total} workout${total!==1?"s":""} logged. Keep building.`:"Your first session starts here."}</p></div>`));
-
-  // today's plan
+  // today's plan — the only primary action on the page
   const pc = planCard(); if(pc) s.appendChild(pc);
 
-  s.appendChild(el(`<div class="stat-grid">
-    <div class="stat"><div class="num">${thisWeek}</div><div class="lbl">This week</div></div>
-    <div class="stat"><div class="num">${streak}</div><div class="lbl">Week streak</div></div>
-    <div class="stat"><div class="num">${total}</div><div class="lbl">All time</div></div>
-  </div>`));
-
-  const quick=el(`<div class="quick-grid"></div>`);
-  const generate = el(`<button class="btn primary">${icon("shuffle")}<span>Generate workout</span></button>`);
-  generate.onclick=()=>go("generator");
-
-  const start = el(`<button class="btn ghost">${icon("plus")}<span>Empty workout</span></button>`);
-  start.onclick=startEmpty;
-
-  const fromR = el(`<button class="btn ghost">${icon("routines")}<span>Browse routines</span></button>`);
-  fromR.onclick=()=>setTab("routines");
-
-  const bw = el(`<button class="btn ghost">${icon("body")}<span>Bodyweight session</span></button>`);
-  bw.onclick=startBodyweight;
-  [generate,start,fromR,bw].forEach(b=>quick.appendChild(b)); s.appendChild(quick);
+  // other ways to start, one compact row
+  const quick=el(`<div class="quick-row" role="group" aria-label="Other ways to start"></div>`);
+  [["shuffle","Generate",()=>go("generator")],["plus","Empty workout",startEmpty],["routines","Routines",()=>setTab("routines")],["body","Bodyweight",startBodyweight]]
+    .forEach(([ic,label,fn])=>{ const b=el(`<button class="qchip">${icon(ic)}<span>${label}</span></button>`); b.onclick=fn; quick.appendChild(b); });
+  s.appendChild(quick);
 
   // recent workouts
   if(state.workouts.length){
@@ -1730,6 +1717,18 @@ function renderHome(app){
       more.onclick=()=>setTab("history"); s.appendChild(more);
     }
   }
+
+  // consistency stats
+  const weekAgo = Date.now() - 7*86400000;
+  const thisWeek = state.workouts.filter(w=>w.end>=weekAgo).length;
+  const total = state.workouts.length;
+  const streak = computeStreak();
+  s.appendChild(el(`<div class="section-label">Consistency</div>`));
+  s.appendChild(el(`<div class="stat-grid">
+    <div class="stat"><div class="num">${thisWeek}</div><div class="lbl">This week</div></div>
+    <div class="stat"><div class="num">${streak}</div><div class="lbl">Week streak</div></div>
+    <div class="stat"><div class="num">${total}</div><div class="lbl">All time</div></div>
+  </div>`));
   app.appendChild(s);
 }
 function greeting(){ const h=new Date().getHours(); const n = h<12?"Good morning":h<18?"Good afternoon":"Good evening"; return n; }
@@ -1799,7 +1798,7 @@ function planCard(){
   });
   card.appendChild(strip);
 
-  if(deloadActive()) card.appendChild(el(`<div class="deload-banner">🌿 <b>Deload week active</b> · working sets are reduced by about one-third and weekly targets adjust with them.</div>`));
+  if(deloadActive()) card.appendChild(el(`<div class="deload-banner">🌿 <b>Deload week</b> · working sets are reduced by about a third. Ends automatically Monday, or turn it off in Settings.</div>`));
 
   if(due){
     // ---- a workout is due ----
@@ -1849,8 +1848,6 @@ function planCard(){
     knock.onclick=knockPenalty; pen.appendChild(knock);
     card.appendChild(pen);
   }
-  const deloadB=el(`<button class="btn ${deloadActive()?"good":"ghost"} sm" style="width:100%;margin-top:12px">${deloadActive()?icon("check","sm")+"<span>Deload active — tap to end</span>":"<span>Make this a deload week</span>"}</button>`);
-  deloadB.onclick=toggleDeload; card.appendChild(deloadB);
   return card;
 }
 
@@ -2996,6 +2993,13 @@ function renderSettings(app){
   barbellCard.appendChild(grid); s.appendChild(barbellCard);
 
   // rest timer
+  // training plan
+  s.appendChild(el(`<div class="section-label">Training Plan</div>`));
+  const plCard=el(`<div class="card"></div>`);
+  plCard.appendChild(toggleRow("Deload this week", deloadActive(), on=>{ if(on!==deloadActive()) toggleDeload(); }));
+  plCard.appendChild(el(`<div class="sub" style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45">Working sets drop by about a third for the current week and weekly targets adjust with them. It ends on its own when the next week starts.</div>`));
+  s.appendChild(plCard);
+
   s.appendChild(el(`<div class="section-label">Rest Timer</div>`));
   const rCard=el(`<div class="card"></div>`);
   rCard.appendChild(el(`<div class="row"><div class="grow"><div class="title">Auto rest timer</div><div class="sub">Adaptive uses the movement, equipment, and target reps. Choose a fixed time to override it.</div></div></div>`));
