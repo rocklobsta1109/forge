@@ -46,13 +46,31 @@ but don't rely on that as a substitute for the rule above.
 
 ## Code layout
 
-- `index.html` — the entire app: markup, styles, and logic in one file
+The app is split into a preserved core and a presentation layer:
+
+- `index.html` — shell only: meta tags, stylesheet and script includes
+- `styles.css` — design system (HIG tokens via `light-dark()`, large titles,
+  inset grouped lists, Liquid-Glass floating bars, rings, charts)
+- `icons.js` — custom SF-Symbols-style icon set, `icon(name)`, `medallion()`
+- `core.js` — data model, exercise library, presets, `MOVEMENT_POOLS`,
+  rotation, sync merge, plate math, suggestions, generator. Lifted verbatim
+  from the single-file app; keep it free of DOM code
+- `ui.js` — navigation (per-tab stacks, view transitions), sheets, toasts,
+  confirm, theme, shared components (segmented, switch, rings, charts, calendar)
+- `workout.js` — the live workout screen and its sheets
+- `screens.js` — Summary, History, Trends, Library, Settings, awards,
+  onboarding, sample data, and boot
 - `exercises.js` — `EXERCISE_INFO`, the how-to text keyed by exercise name
 - `server.py` — static server plus the `/api/data/<name>` GET/PUT backup API
 - `sw.js` — service worker; its `ASSETS` list must include any new file served
 
+Dev preview from a checkout: `python3 server.py 8091` then open
+`http://localhost:8091/?demo=1` for eight weeks of sample data (only seeds
+when there are no workouts). `?screen=workout|history|trends|library|settings`
+opens a screen directly; `?theme=light|dark` forces a theme.
+
 When adding an exercise, keep these in sync: the library/`MOVEMENT_POOLS`
-entry in `index.html`, its equipment tag, and an `EXERCISE_INFO` entry in
+entry in `core.js`, its equipment tag, and an `EXERCISE_INFO` entry in
 `exercises.js`. A movement with no how-to text shows an empty info sheet.
 
 ## Program model

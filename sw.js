@@ -1,13 +1,20 @@
 /* Forge service worker — network-first so updates show up promptly,
    with a cache fallback so it still works offline. */
-const CACHE = "forge-v23";
+const CACHE = "forge-v30";
 const ASSETS = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./icons.js",
+  "./core.js",
+  "./ui.js",
+  "./workout.js",
+  "./screens.js",
   "./exercises.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-maskable.svg",
+  "./apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (e) => {

@@ -1,23 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1b2230"/>
-      <stop offset="1" stop-color="#0a0c10"/>
+      <stop offset="0" stop-color="#FFA050"/>
+      <stop offset=".52" stop-color="#F4531F"/>
+      <stop offset="1" stop-color="#C81E2A"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffa07a"/>
-      <stop offset="1" stop-color="#ff6a3d"/>
+    <radialGradient id="glow" cx=".5" cy=".18" r=".75">
+      <stop offset="0" stop-color="#FFE7C2" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#FFE7C2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFE3D2"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".16"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <g transform="rotate(-45 256 256)">
-    <!-- bar -->
-    <rect x="96" y="240" width="320" height="32" rx="16" fill="url(#bar)"/>
-    <!-- left plates -->
-    <rect x="120" y="200" width="34" height="112" rx="12" fill="#ff6a3d"/>
-    <rect x="92" y="216" width="28" height="80" rx="10" fill="#ffa07a"/>
-    <!-- right plates -->
-    <rect x="358" y="200" width="34" height="112" rx="12" fill="#ff6a3d"/>
-    <rect x="392" y="216" width="28" height="80" rx="10" fill="#ffa07a"/>
-  </g>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="116" fill="url(#glow)"/>
+  <!-- anvil -->
+  <path fill="url(#steel)" d="M84 198 L170 160 H432 V216 L362 236 L344 306 L406 350 V372 H128 V350 L192 306 L174 236 L140 226 Z"/>
+  <path fill="url(#shade)" d="M84 198 L170 160 H432 V216 L362 236 L344 306 L406 350 V372 H128 V350 L192 306 L174 236 L140 226 Z"/>
+  <!-- sparks -->
+  <path fill="#FFF4DA" d="M384 88l11 28 28 11-28 11-11 28-11-28-28-11 28-11z"/>
+  <path fill="#FFF4DA" opacity=".85" d="M446 150l6 15 15 6-15 6-6 15-6-15-15-6 15-6z"/>
+  <path fill="#FFF4DA" opacity=".7" d="M338 122l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
 </svg>

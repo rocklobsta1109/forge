@@ -1,26 +1,17 @@
 {
-  "name": "Forge — Workout Tracker",
+  "name": "Forge",
   "short_name": "Forge",
-  "description": "Log workouts, build routines, and track your strength progress. All data stays on your device.",
+  "description": "Log workouts, follow your program, and track strength over time. Your data stays on your device and your home server.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#090b0e",
-  "theme_color": "#090b0e",
+  "background_color": "#F2F2F7",
+  "theme_color": "#F2F2F7",
   "categories": ["health", "fitness", "lifestyle"],
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-maskable.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }
