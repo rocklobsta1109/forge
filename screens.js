@@ -209,6 +209,7 @@ function renderSummary(app){
   const now=new Date();
   app.appendChild(navBar({title:"Summary",eyebrow:now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}),actions:[profileButton()]}));
   const main=el(`<main class="screen"></main>`);
+  if(DB.get("demo_seeded",false)&&state.workouts.length) main.appendChild(el(`<div class="callout blue">${icon("sparkles")}<div class="body"><b>Sample data.</b> Eight weeks of example training so you can explore. Settings → Erase all data starts you fresh.</div></div>`));
   main.appendChild(weekRingsCard());
   main.appendChild(sectionHeader("Today"));
   main.appendChild(todayCard());
@@ -849,6 +850,7 @@ applyTheme();
   const q=new URLSearchParams(location.search);
   if(q.get("theme")){ state.settings.theme=q.get("theme"); applyTheme(); }
   if(q.get("demo")==="1"&&!state.workouts.length) loadDemoData();
+  if(document.querySelector('meta[name="forge-demo"]')&&!state.workouts.length&&!DB.get("demo_seeded",false)){ loadDemoData(); DB.set("demo_seeded",true); }
   const s=q.get("screen");
   if(s==="workout"){ const {due}=planState(); const r=due?planRoutine(due.key,state.settings.planVariant||"his"):state.routines.find(x=>x.preset); if(r&&!state.active){ startFromRoutine(r.id,due&&due.key); } else if(state.active) nav.overlay="workout"; }
   else if(s==="history"||s==="trends"||s==="library"){ nav.tab=s; }
