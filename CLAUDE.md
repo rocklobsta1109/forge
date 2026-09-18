@@ -2,7 +2,7 @@
 
 Self-hosted workout tracker PWA. Brandon and Chelsey use it several times a week
 on their phones as installed home-screen apps. Repo:
-`https://github.com/rocklobsta1109/forge` (public).
+`https://github.com/rocklobsta1109/forge` (private).
 
 ## This directory is production
 
