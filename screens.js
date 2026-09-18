@@ -820,7 +820,7 @@ function loadDemoData(){
     [1,3,5].forEach((dow,di)=>{
       if(wi===3&&dow===3) return;                                   // one missed session for realism
       const end=start+(dow-1)*86400000+(17*60+30+di*7)*60000;
-      if(end>now) return;
+      if(end>now||isoOf(end)===todayISO()) return;                  // stop at yesterday so today's session is still ahead
       const key=plan[dow], r=planRoutine(key,variant); if(!r) return;
       const bump=Math.floor((7-wi)/2);                               // add load every two weeks
       const exercises=r.exercises.map(re=>{
@@ -848,6 +848,7 @@ seedData();
 applyTheme();
 (function bootParams(){
   const q=new URLSearchParams(location.search);
+  if(q.get("zoom")) document.documentElement.style.zoom=q.get("zoom");   // capture hook: headless Chrome enforces a 500px minimum window
   if(q.get("theme")){ state.settings.theme=q.get("theme"); applyTheme(); }
   if(q.get("demo")==="1"&&!state.workouts.length) loadDemoData();
   if(document.querySelector('meta[name="forge-demo"]')&&!state.workouts.length&&!DB.get("demo_seeded",false)){ loadDemoData(); DB.set("demo_seeded",true); }
@@ -859,6 +860,7 @@ applyTheme();
   else if(s==="detail"&&state.workouts.length){ nav.tab="history"; nav.stacks.history.push({screen:"history-detail",id:state.workouts[0].id}); }
   else if(s==="routine"){ const r=state.routines.find(x=>x.id==="preset-A-his"); if(r){ nav.tab="library"; nav.stacks.library.push({screen:"routine",id:r.id}); } }
   if(q.get("welcome")==="0") DB.set("welcomed",true);
+  if(q.get("probe")==="1") setTimeout(()=>{ const d=document.createElement("div"); d.id="probe"; d.textContent=["iw",innerWidth,"ih",innerHeight,"dpr",devicePixelRatio,"docSW",document.documentElement.scrollWidth,"bodySW",document.body.scrollWidth,"app",document.getElementById("app").offsetWidth,"card",(document.querySelector(".card")||{}).offsetWidth].join(" "); document.body.appendChild(d); },600);
 })();
 render();
 // dev/preview only: ?log=1 with ?screen=workout shows the session mid-set with the rest timer running
