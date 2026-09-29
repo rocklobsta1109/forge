@@ -13,7 +13,7 @@
 <style>
   :root{
     --bg:#090b0e; --surface:#12161b; --surface-2:#191e25; --surface-3:#222933;
-    --border:#2a3039; --hairline:rgba(241,236,228,.09); --text:#f1ece4; --muted:#a39c92; --faint:#716b64;
+    --border:#2a3039; --hairline:rgba(241,236,228,.09); --text:#f1ece4; --muted:#a39c92; --faint:#8e877e;
     --accent:#d98a55; --accent-2:#efb07d; --accent-dim:rgba(217,138,85,.14);
     --good:#68c89a; --good-dim:rgba(104,200,154,.13); --danger:#f06d75;
     --radius:18px; --radius-sm:12px;
@@ -220,14 +220,6 @@
     letter-spacing:.3px;transition:.15s;}
   .nav button .ic{width:23px;height:23px;display:grid;place-items:center;line-height:1;}
   .nav button.active{color:var(--accent);}
-
-  /* ---------- FAB ---------- */
-  .fab{position:fixed;right:calc(50% - 280px + 18px);bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);
-    z-index:35;width:60px;height:60px;border-radius:20px;border:none;background:var(--accent);
-    color:#1a0e08;font-size:30px;font-weight:700;box-shadow:0 10px 26px rgba(255,106,61,.45);
-    cursor:pointer;display:grid;place-items:center;transition:.15s;}
-  .fab:active{transform:scale(.9);}
-  @media(max-width:580px){.fab{right:18px;}}
 
   /* ---------- Active-workout banner ---------- */
   .resume{margin:0 14px 8px;background:var(--accent-dim);border:1px solid var(--accent);
@@ -1322,7 +1314,7 @@ const ICONS={
   routines:'<path d="M8 4h8M9 3h6v3H9zM7 5H5v16h14V5h-2M8 11h8M8 15h8"/>',
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>',
   play:'<path d="m9 7 8 5-8 5z"/>', plus:'<path d="M12 5v14M5 12h14"/>',
-  chevronLeft:'<path d="m15 18-6-6 6-6"/>', chevronDown:'<path d="m6 9 6 6 6-6"/>',
+  chevronLeft:'<path d="m15 18-6-6 6-6"/>', chevronDown:'<path d="m6 9 6 6 6-6"/>', chevronUp:'<path d="m18 15-6-6-6 6"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
   dumbbell:'<path d="M6 9v6M3 10v4M18 9v6M21 10v4M6 12h12"/>',
@@ -2365,12 +2357,136 @@ function renderHistory(app){
 function renderHistoryDetail(app,v){
   const w=state.workouts.find(x=>x.id===v.id);
   if(!w){ back(); return; }
+
+  if(v.editing){
+    const draft=v.draft||(v.draft=JSON.parse(JSON.stringify(w)));
+    const onCancel=()=>{ delete v.editing; delete v.draft; render(); };
+    const saveBtn=el(`<button class="iconbtn accentbtn" aria-label="Save changes" style="background:var(--accent);color:#21130b">${icon("check","sm")}<span>Save</span></button>`);
+    saveBtn.onclick=()=>{
+      const name=(draft.name||"").trim();
+      if(!name){ toast("Workout name cannot be empty"); return; }
+      w.name=name;
+      w.notes=(draft.notes||"").trim();
+      w.exercises=draft.exercises.map(ex=>({
+        ...ex,
+        sets:ex.sets
+          .filter(s=>s.weight!==""||s.reps!=="")
+          .map(s=>({
+            ...s,
+            done:true,
+            weight:s.weight===""?"":Number(s.weight),
+            reps:s.reps===""?"":Number(s.reps)
+          }))
+      })).filter(ex=>ex.sets.length>0);
+
+      if(!w.exercises.length){
+        toast("Workout must have at least one set");
+        return;
+      }
+
+      // Re-evaluate PR flags across updated sets
+      w.exercises.forEach(ex=>{
+        ex.sets.forEach(s=>{
+          const hb=historicalBest(ex.name);
+          const e1=epley(s.weight,s.reps);
+          const wt=Number(s.weight)||0;
+          s.pr=hb.e>0&&((e1>hb.e+0.001)||(wt>hb.w));
+        });
+      });
+
+      w.editedAt=Date.now();
+      save("workouts");
+      delete v.editing;
+      delete v.draft;
+      render();
+      toast("Workout updated","check");
+    };
+
+    app.appendChild(header("Edit Workout",{back:true,backIcon:"close",backLabel:"Cancel",onBack:onCancel,right:saveBtn}));
+    const s=el(`<div class="screen"></div>`);
+
+    const nameF=el(`<div class="field" style="margin-top:4px"><label>Workout name</label><input class="input" value="${esc(draft.name||"")}"/></div>`);
+    $("input",nameF).oninput=e=>{ draft.name=e.target.value; };
+    s.appendChild(nameF);
+
+    const noteF=el(`<div class="field"><label>Notes</label><textarea class="input" rows="2" placeholder="Energy, tweaks, notes…">${esc(draft.notes||"")}</textarea></div>`);
+    $("textarea",noteF).oninput=e=>{ draft.notes=e.target.value; };
+    s.appendChild(noteF);
+
+    s.appendChild(el(`<div class="section-label">Exercises & Sets</div>`));
+
+    draft.exercises.forEach((ex,ei)=>{
+      const blk=el(`<div class="exercise"></div>`);
+      const head=el(`<div class="exercise-head"><span class="name" style="font-weight:800">${esc(ex.name)}</span></div>`);
+      const removeEx=el(`<button class="iconbtn" aria-label="Remove exercise" style="width:34px;height:34px;color:var(--danger)">${icon("trash","sm")}</button>`);
+      removeEx.onclick=()=>{ draft.exercises.splice(ei,1); render(); };
+      head.appendChild(removeEx);
+      blk.appendChild(head);
+
+      const tbl=el(`<div class="set-table"><div class="set-hd" style="grid-template-columns:34px 1fr 1fr 40px;gap:8px"><span>SET</span><span style="text-align:center">${U().toUpperCase()}</span><span style="text-align:center">REPS</span><span></span></div></div>`);
+      ex.sets.forEach((sx,si)=>{
+        const rw=el(`<div class="set-rw" style="grid-template-columns:34px 1fr 1fr 40px;gap:8px"></div>`);
+        rw.appendChild(el(`<div class="setnum">${si+1}</div>`));
+
+        const wIn=el(`<input class="cell" inputmode="decimal" aria-label="Set ${si+1} weight" placeholder="0" value="${sx.weight!==""?sx.weight:""}"/>`);
+        wIn.oninput=()=>{ sx.weight=wIn.value; };
+        rw.appendChild(wIn);
+
+        const rIn=el(`<input class="cell" inputmode="numeric" aria-label="Set ${si+1} reps" placeholder="0" value="${sx.reps!==""?sx.reps:""}"/>`);
+        rIn.oninput=()=>{ sx.reps=rIn.value; };
+        rw.appendChild(rIn);
+
+        const delSet=el(`<button class="iconbtn" aria-label="Remove set ${si+1}" style="width:38px;height:38px;color:var(--faint)">${icon("trash","sm")}</button>`);
+        delSet.onclick=()=>{ ex.sets.splice(si,1); render(); };
+        rw.appendChild(delSet);
+        tbl.appendChild(rw);
+      });
+      blk.appendChild(tbl);
+
+      const addSet=el(`<button class="btn addset sm" style="width:100%;margin-top:8px">${icon("plus","sm")}<span>Add Set</span></button>`);
+      addSet.onclick=()=>{
+        const last=ex.sets[ex.sets.length-1];
+        ex.sets.push({weight:last?last.weight:"",reps:last?last.reps:"",done:true});
+        render();
+      };
+      blk.appendChild(addSet);
+
+      s.appendChild(blk);
+    });
+
+    const addEx=el(`<button class="btn ghost sm" style="width:100%;margin-top:4px">${icon("plus","sm")}<span>Add Exercise</span></button>`);
+    addEx.onclick=()=>openPicker(sel=>{
+      sel.forEach(e=>draft.exercises.push(attachExerciseRef({id:uid(),name:e.name,muscle:e.muscle,sets:[{weight:"",reps:"",done:true}]},e.name)));
+      render();
+    });
+    s.appendChild(addEx);
+
+    const actRow=el(`<div class="btn-row" style="margin-top:16px"></div>`);
+    const cancelBottom=el(`<button class="btn ghost"><span>Cancel</span></button>`);
+    cancelBottom.onclick=onCancel;
+    const saveBottom=el(`<button class="btn primary"><span>Save Changes</span></button>`);
+    saveBottom.onclick=saveBtn.onclick;
+    actRow.appendChild(cancelBottom);
+    actRow.appendChild(saveBottom);
+    s.appendChild(actRow);
+
+    app.appendChild(s);
+    return;
+  }
+
+  const hdrActions=el(`<div style="display:flex;gap:6px"></div>`);
+  const editB=el(`<button class="iconbtn" aria-label="Edit workout" style="background:var(--surface-2)">${icon("edit")}</button>`);
+  editB.onclick=()=>{ v.editing=true; v.draft=JSON.parse(JSON.stringify(w)); render(); };
+  hdrActions.appendChild(editB);
+
   const del=el(`<button class="iconbtn" aria-label="Delete workout" style="background:var(--surface-2)">${icon("trash")}</button>`);
   del.onclick=async()=>{ if(await confirmAct("This removes the workout from your history on every device.",{title:"Delete this workout?",confirmText:"Delete workout"})){
     state.workouts=state.workouts.filter(x=>x.id!==w.id); save("workouts");
     state.deleted.push({id:w.id, ts:Date.now()}); save("deleted");   // tombstone so sync deletes it everywhere
     back(); } };
-  app.appendChild(header(w.name,{right:del}));
+  hdrActions.appendChild(del);
+
+  app.appendChild(header(w.name,{right:hdrActions}));
   const s=el(`<div class="screen"></div>`);
   s.appendChild(el(`<div class="muted" style="margin:0 2px 12px">${fmtDay(w.end)} · ${new Date(w.end).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</div>`));
   if(w.difficulty||w.deload) s.appendChild(el(`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${w.difficulty?`<span class="chip accent">${esc(difficultyText(w.difficulty))}</span>`:""}${w.deload?'<span class="chip">'+icon("leaf","sm")+' Deload</span>':""}</div>`));
@@ -2739,9 +2855,9 @@ function renderRoutineEdit(app,v){
       c.appendChild(cueIn);
 
       const ctl=el(`<div class="row" style="margin-top:8px;gap:8px"></div>`);
-      const up=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} up" style="flex:1">↑</button>`); up.onclick=()=>{ if(i>0){[draft.exercises[i-1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i-1]]; drawList();} };
-      const dn=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} down" style="flex:1">↓</button>`); dn.onclick=()=>{ if(i<draft.exercises.length-1){[draft.exercises[i+1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i+1]]; drawList();} };
-      const rm=el(`<button class="btn danger sm" style="flex:1">Remove</button>`); rm.onclick=()=>{ draft.exercises.splice(i,1); drawList(); };
+      const up=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} up" style="flex:1">${icon("chevronUp","sm")}<span>Up</span></button>`); up.onclick=()=>{ if(i>0){[draft.exercises[i-1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i-1]]; drawList();} };
+      const dn=el(`<button class="btn ghost sm" aria-label="Move ${esc(ex.name)} down" style="flex:1">${icon("chevronDown","sm")}<span>Down</span></button>`); dn.onclick=()=>{ if(i<draft.exercises.length-1){[draft.exercises[i+1],draft.exercises[i]]=[draft.exercises[i],draft.exercises[i+1]]; drawList();} };
+      const rm=el(`<button class="btn danger sm" style="flex:1">${icon("trash","sm")}<span>Remove</span></button>`); rm.onclick=()=>{ draft.exercises.splice(i,1); drawList(); };
       ctl.appendChild(up); ctl.appendChild(dn); ctl.appendChild(rm); c.appendChild(ctl);
       list.appendChild(c);
     });
