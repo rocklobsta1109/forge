@@ -115,6 +115,19 @@
   .week-strip .day.deferred-day{border-color:var(--accent-2);}
   .week-strip .day.deferred-day .db{color:var(--accent-2);}
   .week-strip .day.moved .db{text-decoration:line-through;opacity:.5;}
+  .week-strip .day{cursor:pointer;transition:.12s;}
+  .week-strip .day:active{transform:scale(.94);background:var(--surface-3);}
+  .week-strip .day.done{border-color:rgba(104,200,154,.35);background:rgba(104,200,154,.08);}
+  .week-strip .day.done .dl{color:var(--good);}
+  .week-strip .day.done .db{color:var(--good);}
+  .week-strip .day .day-badge{display:flex;align-items:center;justify-content:center;color:var(--good);margin-top:-2px;}
+  .week-strip .day .day-badge .icon{width:12px;height:12px;stroke-width:2.4;}
+
+  /* ---------- Profile switcher (Home) ---------- */
+  .profile-seg{display:flex;background:var(--surface-2);padding:3px;border-radius:14px;border:1px solid var(--hairline);margin-bottom:12px;}
+  .profile-seg button{flex:1;border:none;background:transparent;color:var(--muted);font-weight:800;font-size:13px;padding:9px 12px;border-radius:11px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .profile-seg button:active{transform:scale(.98);}
+  .profile-seg button.active{background:linear-gradient(180deg,var(--surface-3),#1b2129);color:var(--accent-2);box-shadow:0 2px 10px rgba(0,0,0,.35);border:1px solid rgba(217,138,85,.25);}
   .plan-day{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);}
   .plan-title{font-size:23px;font-weight:850;letter-spacing:-.55px;margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;line-height:1.15;}
   .plan-next{font-size:13px;color:var(--muted);margin-top:8px;}
@@ -1709,6 +1722,31 @@ function renderHome(app){
   app.appendChild(header(greeting(), {back:false, brand:true, right:(()=>{const b=el(`<button class="iconbtn" aria-label="Settings">${icon("settings")}</button>`);b.onclick=()=>go("settings");return b;})()}));
   const s = el(`<div class="screen"></div>`);
 
+  // profile switcher
+  const currentVariant = state.settings.planVariant || "his";
+  const profSeg = el(`<div class="profile-seg" role="radiogroup" aria-label="Active profile">
+    <button class="${currentVariant==='his'?'active':''}" aria-checked="${currentVariant==='his'}" role="radio">${icon("body","sm")}<span>His · Mass</span></button>
+    <button class="${currentVariant==='hers'?'active':''}" aria-checked="${currentVariant==='hers'}" role="radio">${icon("body","sm")}<span>Hers · Tone</span></button>
+  </div>`);
+  const [bHis, bHers] = profSeg.querySelectorAll("button");
+  bHis.onclick = () => {
+    if(state.settings.planVariant !== "his"){
+      state.settings.planVariant = "his";
+      save("settings");
+      render();
+      toast("Switched to His · Mass");
+    }
+  };
+  bHers.onclick = () => {
+    if(state.settings.planVariant !== "hers"){
+      state.settings.planVariant = "hers";
+      save("settings");
+      render();
+      toast("Switched to Hers · Tone");
+    }
+  };
+  s.appendChild(profSeg);
+
   // today's plan — the only primary action on the page
   const pc = planCard(); if(pc) s.appendChild(pc);
 
@@ -1797,13 +1835,59 @@ function planCard(){
 
   // 7-day strip (Mon → Sun)
   const strip = el(`<div class="week-strip"></div>`);
+  const ws = weekStartTs(Date.now());
+  const dateToISOStr = ts => { const dt = new Date(ts); return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"); };
+
   [1,2,3,4,5,6,0].forEach(d=>{
     const k = wp[d];
     let label=k||"·", cls=k?"work":"rest";
     if(d===moveTo){ label=p.deferred.key; cls="work deferred-day"; }
     else if(d===moveFrom){ cls=(k?"work":"rest")+" moved"; }
-    const cell = el(`<div class="day ${cls} ${d===dow?"today":""}">
-      <span class="dl">${DAY_INIT[d]}</span><span class="db">${esc(label)}</span></div>`);
+
+    const offset = d === 0 ? 6 : d - 1;
+    const dayTs = ws + offset * 86400000;
+    const dayISO = dateToISOStr(dayTs);
+    const doneW = state.workouts.find(w => dateToISOStr(w.end) === dayISO);
+
+    if(doneW) cls += " done";
+
+    const cell = el(`<div class="day ${cls} ${d===dow?"today":""}" role="button" tabindex="0" aria-label="${DAY_NAME[d]} ${k?"Workout "+k:label}${doneW?" (completed)":""}">
+      <span class="dl">${DAY_INIT[d]}</span>
+      <span class="db">${esc(label)}</span>
+      ${doneW ? `<span class="day-badge">${icon("check","sm")}</span>` : ""}
+    </div>`);
+
+    cell.onclick = () => {
+      if(doneW){
+        go("history-detail", { id: doneW.id });
+      } else if(k){
+        openSheet(`Workout ${k} Preview`, body => {
+          const pr = planRoutine(k, variant);
+          if(!pr){ body.appendChild(el(`<div class="muted">No routine found for ${k}.</div>`)); return; }
+          body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px;font-size:13px">${esc(programTitle(k))} · ${variantLabel()}</div>`));
+          pr.exercises.forEach(re => {
+            const mapped = mapExerciseForMode(re.name, equipMode());
+            const row = el(`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--hairline)">
+              <div class="grow" style="font-weight:600;font-size:14px">${esc(mapped)}</div>
+              <span class="pill" style="font-variant-numeric:tabular-nums">${re.sets || 1} × ${esc(re.reps || "—")}</span>
+            </div>`);
+            body.appendChild(row);
+          });
+          const startBtn = el(`<button class="btn primary" style="margin-top:14px">${icon("play")}<span>Start Workout ${esc(k)}</span></button>`);
+          startBtn.onclick = () => { closeSheet(); startFromRoutine(pr.id, k); };
+          body.appendChild(startBtn);
+        });
+      } else {
+        openSheet("Rest & Recovery", body => {
+          body.appendChild(el(`<div class="muted" style="margin:-4px 0 12px;font-size:13px">${DAY_NAME[d]} · Active Recovery</div>`));
+          body.appendChild(el(`<div style="font-size:14px;color:var(--text);line-height:1.5">No scheduled lifting for today. Focus on mobility, light walking, hydration, and sleep.</div>`));
+          const bwBtn = el(`<button class="btn ghost sm" style="width:100%;margin-top:14px">${icon("body","sm")}<span>Start Bodyweight session instead</span></button>`);
+          bwBtn.onclick = () => { closeSheet(); startBodyweight(); };
+          body.appendChild(bwBtn);
+        });
+      }
+    };
+    cell.onkeydown = e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); cell.click(); } };
     strip.appendChild(cell);
   });
   card.appendChild(strip);
@@ -2074,6 +2158,27 @@ function exerciseBlock(ex,ei){
   const prevSets = lastPerformance(ex.name);
   const sug = suggestNext(ex, prevSets);
   if(sug) blk.appendChild(el(`<div class="suggest">${icon("progress","sm")} ${esc(sug.text)}</div>`));
+  const bb = isBarbell(ex);
+  const canSwap = altsFor(ex.name).length > 0;
+  if(bb || canSwap){
+    const tools = el(`<div class="exercise-tools"></div>`);
+    if(bb){
+      const warm = el(`<button class="btn ghost sm" aria-label="Warm-up ramp for ${esc(ex.name)}">${icon("flame","sm")}<span>Warm-up</span></button>`);
+      warm.onclick = () => openWarmup(ex);
+      tools.appendChild(warm);
+
+      const plates = el(`<button class="btn ghost sm" aria-label="Plate calculator for ${esc(ex.name)}">${icon("scale","sm")}<span>Plates</span></button>`);
+      plates.onclick = () => openPlateCalculator(ex);
+      tools.appendChild(plates);
+    }
+    if(canSwap){
+      const swap = el(`<button class="btn ghost sm" aria-label="Swap ${esc(ex.name)}">${icon("swap","sm")}<span>Swap</span></button>`);
+      swap.onclick = () => openSwap(ei);
+      tools.appendChild(swap);
+    }
+    blk.appendChild(tools);
+  }
+
   const table = el(`<div class="set-table"></div>`);
   table.appendChild(el(`<div class="set-hd"><span>SET</span><span style="text-align:center">PREV</span><span style="text-align:center">${U().toUpperCase()}</span><span style="text-align:center">REPS</span><span></span></div>`));
 
