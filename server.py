@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Forge static server + tiny JSON backup API.
 
-Serves the app exactly like `python -m http.server`, PLUS:
+Serves only the app's static files (STATIC; anything else is 404), PLUS:
   GET  /api/data/<name>   -> returns stored JSON for <name> (or {} if none)
   PUT  /api/data/<name>   -> stores JSON body as data/<name>.json (atomic)
                              and keeps the last 20 timestamped copies in data/history/
@@ -18,6 +18,12 @@ os.makedirs(HIST, exist_ok=True)
 SAFE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 LOCK = threading.Lock()
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+# Everything the app loads: sw.js ASSETS, plus sw.js itself. ROOT also holds
+# data/, .git/, .claude/, logs and docs, none of which may be readable off the
+# LAN, so a new asset must be added here as well as to ASSETS.
+STATIC = {"/", "/index.html", "/styles.css", "/icons.js", "/core.js", "/ui.js",
+          "/workout.js", "/screens.js", "/exercises.js", "/manifest.webmanifest",
+          "/icon.svg", "/icon-maskable.svg", "/apple-touch-icon.png", "/sw.js"}
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -38,6 +44,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         n = self.path[len("/api/data/"):].split("?")[0]
         return n if SAFE.match(n) else None
 
+    def _static(self):
+        # exact match on the raw path, so //, %-escapes and .. can't reach other files
+        return self.path.split("?", 1)[0].split("#", 1)[0] in STATIC
+
     def do_GET(self):
         if self.path.startswith("/api/data/"):
             name = self._name()
@@ -51,11 +61,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     return self._json(200, json.load(f))
             except Exception:
                 return self._json(200, {})
+        if not self._static():
+            return self.send_error(http.HTTPStatus.NOT_FOUND, "File not found")
         return super().do_GET()
+
+    def do_HEAD(self):
+        if not self._static():
+            return self.send_error(http.HTTPStatus.NOT_FOUND, "File not found")
+        return super().do_HEAD()
 
     def do_PUT(self):
         if not self.path.startswith("/api/data/"):
             return self._json(404, {"error": "not found"})
+        # Browsers can only send application/json cross-origin after a CORS
+        # preflight, which this server never answers, so other pages can't write.
+        if self.headers.get("Content-Type", "").split(";")[0].strip().lower() != "application/json":
+            return self._json(415, {"error": "expected application/json"})
         name = self._name()
         if not name:
             return self._json(400, {"error": "bad name"})
@@ -84,9 +105,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 except OSError:
                     pass
         return self._json(200, {"ok": True, "saved": name})
-
-    def do_POST(self):
-        return self.do_PUT()
 
     def log_message(self, *a):
         pass  # quiet

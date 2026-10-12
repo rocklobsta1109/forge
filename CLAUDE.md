@@ -62,7 +62,9 @@ The app is split into a preserved core and a presentation layer:
   onboarding, sample data, and boot
 - `exercises.js` — `EXERCISE_INFO`, the how-to text keyed by exercise name
 - `server.py` — static server plus the `/api/data/<name>` GET/PUT backup API
-- `sw.js` — service worker; its `ASSETS` list must include any new file served
+- `sw.js` — service worker; its `ASSETS` list must include any new file served,
+  and so must `STATIC` in `server.py`, which 404s everything else (restart the
+  server for that to take effect)
 
 Dev preview from a checkout: `python3 server.py 8091` then open
 `http://localhost:8091/?demo=1` for eight weeks of sample data (only seeds
