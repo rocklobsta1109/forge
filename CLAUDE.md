@@ -49,7 +49,9 @@ but don't rely on that as a substitute for the rule above.
 - `index.html` — the entire app: markup, styles, and logic in one file
 - `exercises.js` — `EXERCISE_INFO`, the how-to text keyed by exercise name
 - `server.py` — static server plus the `/api/data/<name>` GET/PUT backup API
-- `sw.js` — service worker; its `ASSETS` list must include any new file served
+- `sw.js` — service worker; its `ASSETS` list must include any new file served,
+  and so must `STATIC` in `server.py`, which 404s everything else (restart the
+  server for that to take effect)
 
 When adding an exercise, keep these in sync: the library/`MOVEMENT_POOLS`
 entry in `index.html`, its equipment tag, and an `EXERCISE_INFO` entry in
